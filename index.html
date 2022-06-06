@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Cargofl View SIM Tracking Map</title>
+
+    <!-- <link rel="icon" href= "{{ url_for('static',filename='images/favicon-32x32.png') }}" sizes="32x32"> -->
+    <link rel="stylesheet" type="text/css" href="css/global.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/select2.min.css">
+    <link rel="stylesheet" href="css/select2-bootstrap.css">
+
+    <link rel="stylesheet" type="text/css" href="css/loading.css">
+    <script src="js/jquery-2.1.3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/select2.min.js"></script>
+
+    <!--   For SIM Tracking Map View -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin="" />
+    <link rel="stylesheet" src="leaflet-1.2.0/css/leaflet.css" />
+    <link rel="stylesheet" src="leaflet-1.2.0/css/leaflet-routing-machine.css" /> -->
+
+    <!-- <script src="css/leaflet-1.3.4/dist/js/leaflet.js"
+        integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+        crossorigin=""></script>
+    <script src="leaflet-1.2.0/js/leaflet.js"></script>
+    <script src="leaflet-1.2.0/js/leaflet-routing-machine.js"></script> -->
+    <!--   End -->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+        integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+        crossorigin="" />
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+        integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+        crossorigin=""></script>
+
+    <style>
+        #mapid {
+            height: 770px;
+            margin-left: 80px;
+            margin-right: 80px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container-5">
+        <div id="manage">
+
+
+            <!-- <button type="button" class="pull-right back-btn"
+                onclick="window.location.href='{{ url_for('loadboard') }}';"><i
+                    class="fas fa-angle-left"></i>Back</button> -->
+
+
+            <!-- nav tab section start -->
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#">SIM tracking</a></li>
+            </ul>
+        </div>
+
+
+        <div id="map-div">
+            <div id="mapid"></div>
+        </div>
+
+        <div class="divLoading"></div>
+
+    </div>
+
+
+    <script>
+
+
+        $.ajax({
+            type: "POST",
+            url: "https://mt-test.cargofl.com/api/v1/sim_tracking/get-sim-tracking-location-details",
+            data: JSON.stringify({
+                "mobile_number": "8149910113",
+                "startTime": "03-05-2021 22:07:37",
+                "stopTime": "04-05-2021 09:09:50"
+            }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (response) {
+                if (response['data'].length > 0) {
+                    ajax_response = JSON.stringify(response.data);
+                    var gps_data = JSON.parse(ajax_response);
+                    view_map_view(gps_data)
+                }
+                else {
+                    alert("Encountered an error!")
+                }
+            }
+        });
+
+        function view_map_view(gps_data) {
+
+
+            Lat = 18.5204;
+            Lon = 73.8567;
+
+            var a = [];
+            $.each(gps_data, function (index, data) {
+                a.push({ "lat": data.latitude, "lng": data.longitude, "address": data.address + ", Date - " + data.date_time, "location_number": (index + 1).toString() });
+            });
+
+            // If location details present then set default lat long as a first location
+            if (a.length >= 1) {
+                Lat = a[0].lat;
+                Lon = a[0].lng;
+            }
+
+            $('#mapid').remove(); // this is <canvas> element
+            $('#map-div').append('<div id="mapid"></div>');
+
+            // Create map view
+            var mymap = L.map('mapid').setView([Lat, Lon], 11);
+
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(mymap);
+
+            $('#templateModal_map_View').on('shown.bs.modal', function () {
+                mymap.invalidateSize();
+            });
+
+            // Create marker with different colour
+            var greenIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                iconSize: [40, 65]
+            });
+
+            var redIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                iconSize: [40, 65]
+            });
+
+            var blueIcon = new L.Icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                iconSize: [30, 55]
+            });
+
+
+            for (i = 0; i < a.length; i++) {
+                // If first location, then set colour as green
+                if (i == 0) {
+                    // Add address as title and bindtooltp for showing location sequentially
+                    var marker = L.marker([a[i].lat, a[i].lng],
+                        {
+                            title: a[i].address,
+                            icon: greenIcon
+                        },
+
+                    ).bindTooltip(a[i].location_number,
+                        {
+                            permanent: true,
+                            direction: 'right'
+                        })
+                        .addTo(mymap);
+                }
+                // If last location, then set colour as red
+                else if (i == a.length - 1) {
+                    // Add address as title and bindtooltp for showing location sequentially
+                    var marker = L.marker([a[i].lat, a[i].lng],
+                        {
+                            title: a[i].address,
+                            icon: redIcon
+                        },
+                    ).bindTooltip(a[i].location_number,
+                        {
+                            permanent: true,
+                            direction: 'right'
+                        })
+                        .addTo(mymap);
+
+                }
+                // Set colour as blue for remaining markers
+                else {
+                    // Add address as title and bindtooltp for showing location sequentially
+                    var marker = L.marker([a[i].lat, a[i].lng],
+                        {
+                            title: a[i].address,
+                            icon: blueIcon
+                        },
+                    ).bindTooltip(a[i].location_number,
+                        {
+                            permanent: true,
+                            direction: 'right'
+                        })
+                        .addTo(mymap);
+
+                }
+            }
+
+            // Function to connect then ping points
+            function connectTheDots(data) {
+                var c = [];
+                for (i = 0; i < a.length; i++) {
+                    var x = a[i].lat;
+                    var y = a[i].lng;
+                    c.push([x, y]);
+                }
+                return c;
+            }
+            // connect location points with polyline
+            pathCoords = connectTheDots(window.geojson);
+            var pathLine = L.polyline(pathCoords).addTo(mymap);
+
+        }
+
+    </script>
+
+</body>
+
+</html>
