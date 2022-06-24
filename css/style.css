@@ -1,0 +1,130 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: block;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.25;
+  color: #212529;
+  text-align: left;
+  background-color: #fff;
+}
+
+.main-container {
+  min-height: 100vh;
+}
+
+.tx-brand-01 {
+  color: #394a58 !important;
+}
+
+.tx-brand-02 {
+  color: #b6d6fc !important;
+}
+
+.tx-black {
+  color: #000000 !important;
+}
+
+.tx-white {
+  color: #ffffff !important;
+}
+
+.tx-bold {
+  font-weight: 700;
+}
+
+.tx-semibold {
+  font-weight: 600;
+}
+
+.tx-medium {
+  font-weight: 500;
+}
+
+.tx-normal {
+  font-weight: 400;
+}
+
+.tx-light {
+  font-weight: 300;
+}
+
+.tx-center {
+  text-align: center;
+}
+
+.tx-right {
+  text-align: right;
+}
+
+.tx-left {
+  text-align: left;
+}
+
+.bg-brand-01 {
+  color: #394a58 !important;
+}
+
+.bg-brand-02 {
+  color: #b6d6fc !important;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.driver-info .list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.get-consent-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  border: 1px solid #394a58;
+  border-radius: 25%;
+  cursor: pointer;
+  z-index: 1;
+  padding: 0.5rem 0.5rem;
+}
+
+.tracking-google-map-box {
+  border: 1px solid #fafafa;
+}
+.tracking-google-map-box .tracking-google-map {
+  min-height: 55vh;
+  height: 100%;
+  width: 100%;
+}
+
+.header-title {
+  padding: 1rem 0.5rem;
+  border: 1px solid #fafafa;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  background-color: #394a58;
+}
+
+@media only screen and (max-width: 991px) {
+  .header-title {
+    font-size: 1.5rem;
+    padding: 0.75rem 0.25rem;
+    margin: 2rem 0;
+  }
+}
+
+/*# sourceMappingURL=style.css.map */
