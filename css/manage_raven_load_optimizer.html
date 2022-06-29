@@ -1,0 +1,373 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="icon" href="/static/images/favicon-32x32.png" sizes="32x32">
+
+	<title>CargoFL Raven Load Optimizer</title>
+	<link rel="stylesheet" type="text/css" href="/static/css/global.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/bootstrap-table.min.css">
+	<link rel="stylesheet" href="/static/css/bootstrapValidator.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/select2.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/select2-bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/datetimepicker/bootstrap-datetimepicker.min.css">
+	<link rel="stylesheet" type="text/css" href="/static/bootstrap3-editable-1.5.1/bootstrap-editable.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/daterangepicker.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/loading.css">
+
+	<script src="/static/js/jquery-2.1.3.min.js"></script>
+	<script src="/static/js/bootstrap.min.js"></script>
+	<script src="/static/js/bootstrap-table.min.js"></script>
+	<script src="/static/js/tableExport.js"></script>
+	<script src="/static/js/bootstrap-table-export.js"></script>
+	<script src="/static/js/bootstrapValidator.min.js"></script>
+	<script src="/static/js/select2.min.js"></script>
+	<script src="/static/custom/invoice/assets/plugins/moment/moment.js"></script>
+	<script src="/static/js/daterangepicker.min.js"></script>
+	<script src="/static/js/datetimepicker/bootstrap-datetimepicker.min.js"></script>
+	<script type="text/javascript" src="/static/bootstrap3-editable-1.5.1/bootstrap-editable.js"></script>
+	<script type="text/javascript"
+		src="/static/bootstrap-table-1.15.5/bootstrap-table/bootstrap-table-editable.js"></script>
+	<script src="/static/js/cargofl-date-validation.js"></script>
+	<script src="/static/custom/invoice/assets/plugins/moment/moment.js"></script>
+	<script src="/static/js/common.js"></script>
+
+	<script type="text/javascript">
+		// Running Formatter from Count 1
+		function runningFormatter(value, row, index) {
+			return index + 1;
+		}
+		// Add query parameters
+		function queryParams(params) {
+			// add filter_loading_location_id to the query params
+			params.filter_loading_location_id = $('#filter_loading_location_id').find("option:selected").val();
+			params.planning_date_range = $("#dispatch_invoices_table_filters input[name='invoice_date_range']").val();
+			return params;
+		}
+
+		function actionFormatter(value, row, index) {
+			return [
+				'<a class="view ml10" href="javascript:void(0)" title="View Input">',
+				'<i class="glyphicon glyphicon-eye-open"></i>',
+				'</a>'
+			].join('');
+		}
+
+		// Added link formatter for Attatchment link
+		function actionFormatterViewOutput(value, row, index) {
+			if (row['load_optimization_output'] != null) {
+				return [
+					'<a class="view_output ml10" href="javascript:void(0)" title="View Output">',
+					'<i class="glyphicon glyphicon-download-alt"></i>',
+					'</a>'
+				].join('');
+			}
+
+		}
+
+		// Route formatter
+		function actionFormatterViewRoute(value, row, index) {
+			if (row['load_optimization_output'] != null) {
+				return [
+					'<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
+					'<i class="glyphicon glyphicon-road"></i>',
+					'</a>'
+				].join('');
+			}
+
+		}
+
+		// Window action events
+		window.actionEvents = {
+			'click .view': function (e, value, row, index) {
+				// render the view PO page
+				window.location = '/view_raven_load_optimizer_input?raven_req_number=' + row['raven_req_number'] + '&franchiseid=' + row['franchiseid'];
+			},
+			'click .view_output': function (e, value, row, index) {
+				// render the view PO page
+				window.location = '/view_raven_load_optimizer_output?raven_req_number=' + row['raven_req_number'] + '&franchiseid=' + row['franchiseid'];
+			},
+			'click .view_route': function (e, value, row, index) {
+				$.ajax({
+					type: "GET",
+					url: "/view_raven_load_optimizer_route",
+					data: { 'raven_req_number': row['raven_req_number'], 'franchiseid': row['franchiseid'] },
+					success: function (data) {
+						route_information = data['data']['product_data'];
+						modalOpen(route_information);
+					},
+					error: function (XMLHttpRequest, textStatus, errorThrown) {
+						alert("Error occoured while fetching route info");
+					}
+				});
+			}
+		}
+
+
+
+		function datetimeFormatter(data) {
+			if (data && moment.utc(data)) {
+				return moment.utc(data).format('DD-MM-YYYY HH:mm');
+			}
+			else {
+				return data;
+			}
+		}
+
+	</script>
+
+	<style>
+		.time-line-box {
+			height: 100px;
+			padding: 100px 0;
+			width: 100%;
+			background-color: #dadefe;
+		}
+
+		.time-line-box .timeline {
+			list-style-type: none;
+			display: flex;
+			padding: 0;
+			text-align: center;
+		}
+
+		.time-line-box .timestamp {
+			margin: auto;
+			margin-bottom: 5px;
+			padding: 0px 4px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.time-line-box .status {
+			padding: 0px 10px;
+			display: flex;
+			justify-content: center;
+			border-top: 3px solid #455EFC;
+			position: relative;
+			transition: all 200ms ease-in;
+		}
+
+		.time-line-box .status span {
+			padding-top: 8px;
+		}
+
+		.time-line-box .status span:before {
+			content: '';
+			width: 12px;
+			height: 12px;
+			background-color: #455EFC;
+			border-radius: 12px;
+			border: 2px solid #455EFC;
+			position: absolute;
+			left: 50%;
+			top: 0%;
+			-webkit-transform: translate(-50%, -50%);
+			-ms-transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+			transition: all 200ms ease-in;
+		}
+
+		.swiper-container {
+			width: 95%;
+			margin: auto;
+			overflow-y: auto;
+		}
+
+		.swiper-wrapper {
+			display: inline-flex;
+			flex-direction: row;
+			overflow-y: auto;
+			justify-content: center;
+		}
+
+		.swiper-container::-webkit-scrollbar-track {
+			background: #a8a8a8b6;
+		}
+
+		.swiper-container::-webkit-scrollbar {
+			height: 2px;
+		}
+
+		.swiper-container::-webkit-scrollbar-thumb {
+			background: #4F4F4F !important;
+		}
+
+		.swiper-slide {
+			text-align: center;
+			font-size: 12px;
+			width: 200px;
+			height: 100%;
+			position: relative;
+		}
+	</style>
+
+</head>
+
+<body>
+
+	<!-- include header and menu -->
+	{% include 'header.html' %}
+
+	<div class="container-5">
+
+		<!-- include feeback message block -->
+		{% include 'feedback.html' %}
+
+		<ul class="nav nav-tabs">
+			<li class="active"><a data-toggle="tab" href="#dimensions">Raven Optimizer</a></li>
+			<li class="pull-right">
+			<li class="pull-right"><button class="btn btn-primary"
+					onclick="window.location.href='{{ url_for('input_load_optimizer') }}';">Optimize</button></li>
+			</li>
+		</ul>
+
+		<div class="tab-content">
+			<div id="dispatch_invoices" class="tab-pane fade in active">
+
+				<br />
+				<div id="dispatch_invoices_table_filters" class="form-inline cargofl-table-toolbar">
+
+					<div class="input-group width-200-px">
+						<label>Planning Date</label>
+						<input type="text" name="invoice_date_range" class="form-control" readonly
+							style="background-color: white;">
+					</div>
+				</div>
+			</div>
+
+			<div id="dimensions" class="tab-pane fade in active">
+
+				<div id="dimensions_toolbar" class="form-inline">
+
+					<select name="filter_loading_location_id" id="filter_loading_location_id"
+						class=" form-control selectpicker">
+						<option value="All">Please Select Loading Location</option>
+						{% for customer in customer_list %}
+						<option value="{{ customer.login_id }}">{{ customer.name }}
+						</option>
+						{% endfor %}
+					</select>
+
+				</div>
+
+				<div class="modal fade" id="templateModal_showRoute" tabindex="-1" role="dialog"
+					aria-labelledby="templateModalLabel" data-keyboard="false" data-backdrop="static">
+					<div class="modal-dialog" role="document" style="width:40%;">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+										aria-hidden="true">&times;</span></button>
+								<h4 class="modal-title" id="templateModalLabel">Trip Route</h4>
+							</div>
+							<div class="modal-body">
+								<section class="time-line-box">
+									<div class="swiper-container text-center">
+										<div class="swiper-wrapper">
+											<div class="swiper-slide" id="route_planner">
+												<div class="timestamp"><span class="date">1</span></div>
+												<div class="status"><span>{{ session['logged_user_name'] }}</span></div>
+											</div>
+										</div>
+										<div class="swiper-pagination"></div>
+									</div>
+								</section>
+							</div>
+							<div class="modal-footer">
+								<button type="button" id="close-show-route" class="btn btn-default"
+									data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<table id="dimensions_table" class="table table-hover table-condensed cargofl-table" data-toggle="table"
+					data-toolbar="#dimensions_toolbar" data-show-export="true"
+					data-url="/retrieve_all_load_optimizations" data-query-params=queryParams data-pagination="true"
+					data-side-pagination="server" data-search="true" data-show-refresh="true" data-show-columns="true"
+					data-page-size="15" data-page-list="[15,30,45,60,100,150,250,500,1000]">
+					<thead>
+						<th data-formatter="runningFormatter" class="text-center">#</th>
+						<th data-field="action" class="text-center" data-formatter="actionFormatter"
+							data-events="actionEvents">Input</th>
+						<th data-field="raven_req_number" class="text-center">Optimization #</th>
+						<th data-field="action_view_output" class="text-center"
+							data-formatter="actionFormatterViewOutput" data-events="actionEvents">Output</th>
+						<th data-field="action_view_route" class="text-center" data-formatter="actionFormatterViewRoute"
+							data-events="actionEvents">Route</th>
+						<th data-field="planning_date" class="text-center">Planning Date</th>
+						<th data-field="loading_location_name" class="text-center">Loading Location</th>
+						<th data-field="status" class="text-center">Status</th>
+						<th data-field="optimization_percentage" class="text-center">Volume Optimization %</th>
+						<th data-field="weight_optimization_percentage" class="text-center">Weight Optimization %</th>
+						<th data-field="added_by_name" class="text-center">Added By</th>
+						<th data-field="added_on" class="text-center" data-formatter="datetimeFormatter">Added
+							On
+						</th>
+						<th data-field="franchiseid" class="text-center" data-visible="false">franchiseid</th>
+					</thead>
+				</table>
+			</div>
+
+		</div>
+	</div>
+
+	<script type="text/javascript">
+
+		$("#dispatch_invoices_table_filters input[name='invoice_date_range']").daterangepicker({
+			startDate: moment().startOf('year'),
+			endDate: moment(),
+			autoApply: true,
+			ranges: {
+				'This Year': [moment().startOf('year'), moment()],
+				'Past 7 Days': [moment().subtract(7, 'day'), moment()],
+				'This Week': [moment().startOf('week'), moment()],
+				'This Month': [moment().startOf('month'), moment().endOf('month')],
+				'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+			},
+			locale: {
+				format: 'DD-MM-YYYY',
+			}
+		});
+
+		$("#dispatch_invoices_table_filters input[name='invoice_date_range']").on('apply.daterangepicker', function (ev, picker) {
+			$('#dimensions_table').bootstrapTable('refresh');
+		});
+
+		// apply select2 theme for filter_loading_location_id select box
+		$('#filter_loading_location_id').select2({
+			theme: "bootstrap",
+			width: "100%"
+		});
+
+		// on change of filter_loading_location_id select box refresh the table
+		$('#filter_loading_location_id').change(function () {
+			$('#dimensions_table').bootstrapTable('refresh');
+		});
+
+		function modalOpen(route_information) {
+			$("#route_planner").after("");
+			let route_counter = 1;
+			let markup = "";
+			route_information.forEach(element => {
+				route_counter += 1;
+				markup += "<div class='swiper-slide'> <div class='timestamp'><span class='date'>" + route_counter + "</span></div><div class='status'><span>" + element['customer_name'] + '</span></div></div>';
+			});
+			$("#route_planner").after(markup);
+			$("#templateModal_showRoute").modal("show");
+		}
+
+		$("#close-show-route").click(function () {
+			location.reload(true);
+		});
+	</script>
+
+	<!-- include footer -->
+	{% include 'footer.html' %}
+
+</body>
+
+</html>

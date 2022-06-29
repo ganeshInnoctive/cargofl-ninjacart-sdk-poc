@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -7,7 +8,61 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-table.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-table.css">
+
+    <script src="js/bootstrap-table.min.js"></script>
+    <script src="js/jquery/jquery.js"></script>
+    <script src="js/bootstrap-table.js"></script>
+    <script src="js/urls.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/error_messages.js"></script>
+    <script src="js/success_messages.js"></script>
+    <script src="js/constants.js"></script>
+
+    <script type="text/javascript">
+        function actionFormatterViewOutput(value, row, index) {
+            if (row['sim_consent_status'] == "N") {
+                return [
+                    '<button type="button" onclick=reroute()>Track</button>' 
+                    // '<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
+                    // '<i class="glyphicon glyphicon-road"></i>',
+                    // '</a>'
+                ].join('');
+            }
+        }
+
+        window.actionEvents = {
+            'click .view_output': function (e, value, row, index) {
+                // render the view PO page
+                window.location = '/view_raven_load_optimizer_output?raven_req_number=' + row['raven_req_number'] + '&franchiseid=' + row['franchiseid'];
+            },
+            'click .view_route': function (e, value, row, index) {
+                $.ajax({
+                    type: "GET",
+                    url: "/view_raven_load_optimizer_route",
+                    data: { 'raven_req_number': row['raven_req_number'], 'franchiseid': row['franchiseid'] },
+                    success: function (data) {
+                        route_information = data['data']['product_data'];
+                        modalOpen(route_information);
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert("Error occoured while fetching route info");
+                    }
+                });
+            }
+        }
+    </script>
+
+    <style>
+        .ml10 {
+            margin-left: 10px;
+            color: grey;
+        }
+    </style>
+
 </head>
+
 <body>
     <main class="main-container">
         <section class="p-2 p-md-3 p-lg-5">
@@ -18,101 +73,67 @@
                             <div class="col-12 col-lg-12">
                                 <h1 class="tx-bold tx-center header-title">Track Driver</h1>
                             </div>
-                            <div class="col-12 col-lg-12 my-2 my-lg-4 my-xl-5">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="row no-gutters">
-                                            <div class="col-12 col-lg-5">
-                                                <ul class="list-group driver-info">
-                                                    <li class="list-group-item">
-                                                        <div class="tx-semibold">Driver Name :</div>
-                                                        <div class="tx-normal">John Doe</div>
-                                                    </li>
-                                                    <li class="list-group-item">
-                                                        <div class="tx-semibold">Driver Number :</div>
-                                                        <div class="tx-normal">9876543210</div>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <div class="col-12 col-lg-5 offset-lg-2 mt-2 mt-lg-0">
-                                                <ul class="list-group driver-info">
-                                                    <li class="list-group-item">
-                                                        <div class="tx-semibold">Consent Initiated :</div>
-                                                        <div class="tx-normal">Yes( <a href="tracking-data.html"><i class="fa fa-map-marker text-danger"></i></a>  ) </div>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="col-12 col-lg-12">
                                 <div class="card">
                                     <div class="card-header">
                                         <div class="tx-semibold">Track Driver List</div>
                                     </div>
                                     <div class="card-body">
-                                        <div class="table-responsive">
-                                            <table class="table table-sm table-hover table-bordered table-striped mb-0">
-                                                <thead class="thead-success">
-                                                    <tr>
-                                                      <th scope="col">Sr. No</th>
-                                                      <th scope="col">Driver Name</th>
-                                                      <th scope="col">Driver Number</th>
-                                                      <th scope="col">Consent Initiated</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                      <th>1</th>
-                                                      <td>John Doe</td>
-                                                      <td>9876543210</td>
-                                                      <td>
-                                                        <div class="tx-normal">Yes( <a href="tracking-data.html"><i class="fa fa-map-marker text-danger"></i></a>  ) </div>
-                                                      </td>
-                                                    </tr>
-                                                    <tr>
-                                                      <th>2</th>
-                                                      <td>James Smith</td>
-                                                      <td>9328765410</td>
-                                                      <td>
-                                                        <div class="tx-normal">Yes( <a href="tracking-data.html"><i class="fa fa-map-marker text-danger"></i></a>  ) </div>
-                                                      </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="d-flex justify-content-end align-item-center my-2 mt-lg-4">
-                                            <nav aria-label="Track Driver Pagination">
-                                                <ul class="pagination mb-0">
-                                                  <li class="page-item disabled">
-                                                    <a class="page-link">Previous</a>
-                                                  </li>
-                                                  <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                                  <li class="page-item active" aria-current="page">
-                                                    <a class="page-link" href="#">2</a>
-                                                  </li>
-                                                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                                  <li class="page-item">
-                                                    <a class="page-link" href="#">Next</a>
-                                                  </li>
-                                                </ul>
-                                            </nav>
-                                        </div>
+                                        <table id="table" data-toggle="table" data-ajax="ajaxRequest"
+                                            data-side-pagination="server" data-pagination="true">
+                                            <thead>
+                                                <tr>
+                                                    <th data-field="name">Name</th>
+                                                    <th data-field="mobile_number">Number</th>
+                                                    <th data-field="sim_consent_status">Consent</th>
+                                                    <th data-field="action_view_route" class="text-center"
+                                                        data-formatter="actionFormatterViewOutput"
+                                                        data-events="actionEvents">Track</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
         </section>
-        <button type="button" class="btn btn-success get-consent-btn" onclick="location.href = 'get-consent.html';"><i class="fas fa-plus-circle fa-2x"></i></button>
+        <button type="button" class="btn btn-success get-consent-btn" onclick="location.href = 'get-consent.html';"><i
+                class="fas fa-plus-circle fa-2x"></i></button>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
-    <script src="js/index.js"></script>
 
+    <script>
+        function ajaxRequest(params) {
+            $.ajax({
+                type: "POST",
+                url: BASE_URL + GET_ALL_DRIVERS,
+                data: JSON.stringify({
+                    "franchise_id": "FOY0320",
+                    "offset": 1,
+                    "limit": 15
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    params.success(response)
+                },
+                error: function (response) {
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GENERATING_AUTH_TOKEN)
+                    }
+                }
+            });
+        }
+
+        function reroute(){
+            console.log("This works!")
+            window.location.href = 'tracking-data.html';
+        }
+    </script>
 </body>
+
 </html>
