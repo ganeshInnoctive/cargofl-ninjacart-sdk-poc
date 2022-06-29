@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <main class="main-container">
         <section class="p-2 p-md-3 p-lg-5">
@@ -35,7 +37,8 @@
                                                 </ul>
                                             </div>
                                             <div class="col-12 col-lg-12 mt-4">
-                                                <button type="button" class="btn btn-primary btn-lg btn-block">Get Consent</button>
+                                                <button type="button" class="btn btn-primary btn-lg btn-block">Get
+                                                    Consent</button>
                                             </div>
                                         </div>
                                     </div>
@@ -52,5 +55,50 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
     <script src="js/index.js"></script>
 
+    <script>
+        $.ajax({
+            type: "POST",
+            url: "http://fleetosmobileapi.vamosys.com/authenticate",
+            data: JSON.stringify({
+                "username": "4bp2e2ivsRW9x3md10ZdFq7D8Oq1",
+                "password": "contact@innoctive.com"
+            }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (response) {
+                $.ajax({
+                    type: "POST",
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "bearer " + response['token']);
+                    },
+                    url: "http://v3.cargofl.com:5000/api/v3/sim-tracking/add-driver",
+                    data: JSON.stringify({
+                        "mobile_number": $('#mobile_number').val(),
+                        "name": $('#name').val()
+                    }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (response) {
+                        $.ajax({
+                            type: "GET",
+                            beforeSend: function (request) {
+                                request.setRequestHeader("Authorization", "bearer " + response['token']);
+                            },
+                            url: "http://v3.cargofl.com:5000/api/v3/sim-tracking/send-consent",
+                            data: {
+                                "user_id": response['user_id']
+                            },
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (response) {
+
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+    </script>
 </body>
+
 </html>
