@@ -23,7 +23,7 @@ body {
 }
 
 .tx-brand-01 {
-  color: #394a58 !important;
+  color: #3E8CFF !important;
 }
 
 .tx-brand-02 {
@@ -71,7 +71,7 @@ body {
 }
 
 .bg-brand-01 {
-  color: #394a58 !important;
+  color: #3E8CFF !important;
 }
 
 .bg-brand-02 {
@@ -95,7 +95,7 @@ body {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  border: 1px solid #394a58;
+  border: 1px solid #3E8CFF;
   border-radius: 25%;
   cursor: pointer;
   z-index: 1;
@@ -116,7 +116,7 @@ body {
   border: 1px solid #fafafa;
   border-radius: 0.5rem;
   color: #ffffff;
-  background-color: #394a58;
+  background-color: #3E8CFF;
 }
 
 @media only screen and (max-width: 991px) {
