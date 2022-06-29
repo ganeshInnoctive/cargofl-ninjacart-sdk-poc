@@ -253,7 +253,8 @@
                         alert(ERROR_RESPONSE_NULL)
                     } else {
                         if (response['code'] == API_SUCCESS_CODE) {
-                            window.location.href = 'tracking-data.html';
+                            window.location.href = 'track-driver.html';
+                            alert("Driver added succssfully!")
                         } else {
                             hide_loader()
                             if (response['message'] != null && response['message'] != "") {
