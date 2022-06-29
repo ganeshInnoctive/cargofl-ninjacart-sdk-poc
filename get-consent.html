@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="css/fontawesome/fontawesome.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/loader.css">
 
     <script src="js/jquery/jquery.js"></script>
     <script src="js/bootstrap/bootstrap-bundle.js"></script>
@@ -19,6 +20,7 @@
     <script src="js/error_messages.js"></script>
     <script src="js/success_messages.js"></script>
     <script src="js/constants.js"></script>
+    <script src="js/essential_methods.js"></script>
 </head>
 
 <body>
@@ -57,7 +59,7 @@
                                             </div>
                                             <div class="col-12 col-lg-12 mt-4 text-center">
                                                 <button id="button_send_consent" type="button"
-                                                    class="btn btn-primary btn-sm">Get
+                                                    class="btn btn-primary btn-sm ">Get
                                                     Consent</button>
                                             </div>
                                         </form>
@@ -73,6 +75,7 @@
     </main>
 
     <script>
+        hide_loader()
         function isNumber(event) {
             event = (event) ? event : window.event;
             var charCode = (event.which) ? event.which : event.keyCode;
@@ -84,7 +87,7 @@
             return true;
         }
 
-        $("#button_send_consent").on('click', function () {
+        $("#button_send_consent").on('click', function (e) {
             let driver_name = $("#input_driver_name").val()
             let driver_mobile_number = $("#input_driver_mobile").val()
 
@@ -96,9 +99,11 @@
                 alert('Driver mobile number is mandatory')
             } else if (driver_mobile_number.length != 10) {
                 alert('Driver mobile number should be 10 digit number')
+            } else {
+                e.preventDefault()
+                show_loader()
+                get_access_token(driver_name, driver_mobile_number)
             }
-
-            get_access_token(driver_name, driver_mobile_number)
         });
 
 
@@ -115,8 +120,10 @@
                 success: function (response) {
                     console.log(response)
                     if (response == null) {
+                        hide_loader()
                         alert(ERROR_RESPONSE_NULL)
                     } else if (response['auth_token'] == null || response['auth_token'] == "") {
+                        hide_loader()
                         alert(ERROR_TOKEN_EMPTY)
                     } else {
                         if (response['code'] == API_SUCCESS_CODE) {
@@ -124,6 +131,7 @@
 
                             call_add_driver(driver_name, driver_mobile_number, token)
                         } else {
+                            hide_loader()
                             if (response['message'] != null && response['message'] != "") {
                                 alert(response['message'])
                             } else {
@@ -133,6 +141,7 @@
                     }
                 },
                 error: function (response) {
+                    hide_loader()
                     if (response['message'] != null && response['message'] != "") {
                         alert(response['message'])
                     } else {
@@ -150,18 +159,21 @@
                 },
                 url: BASE_URL + ENDPOINT_ADD_DRIVER,
                 data: JSON.stringify({
-                    "mobile_number": driver_mobile_number,
-                    "name": driver_name
+                    "driver_mobile_number": driver_mobile_number,
+                    "driver_name": driver_name,
+                    "franchise_id" : "FOY0320"
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 success: function (response) {
                     if (response == null) {
+                        hide_loader()
                         alert(ERROR_RESPONSE_NULL)
                     } else {
                         if (response['code'] == API_SUCCESS_CODE) {
                             get_driver_details_from_fleetos(driver_mobile_number, token)
                         } else {
+                            hide_loader()
                             if (response['message'] != null && response['message'] != "") {
                                 alert(response['message'])
                             } else {
@@ -171,6 +183,7 @@
                     }
                 },
                 error: function (response) {
+                    hide_loader()
                     if (response['message'] != null && response['message'] != "") {
                         alert(response['message'])
                     } else {
@@ -191,6 +204,7 @@
                 dataType: 'json',
                 success: function (response) {
                     if (response == null) {
+                        hide_loader()
                         alert(ERROR_RESPONSE_NULL)
                     } else {
                         if (response['code'] == API_SUCCESS_CODE) {
@@ -202,6 +216,7 @@
                                 alert(ERROR_GETTING_DRIVER_ID)
                             }
                         } else {
+                            hide_loader()
                             if (response['message'] != null && response['message'] != "") {
                                 alert(response['message'])
                             } else {
@@ -211,6 +226,7 @@
                     }
                 },
                 error: function (response) {
+                    hide_loader()
                     if (response['message'] != null && response['message'] != "") {
                         alert(response['message'])
                     } else {
@@ -233,11 +249,13 @@
                 contentType: 'application/json; charset=utf-8',
                 success: function (response) {
                     if (response == null) {
+                        hide_loader()
                         alert(ERROR_RESPONSE_NULL)
                     } else {
                         if (response['code'] == API_SUCCESS_CODE) {
-                            alert(SUCCESS_SENDING_CONSENT)
+                            window.location.href = 'tracking-data.html';
                         } else {
+                            hide_loader()
                             if (response['message'] != null && response['message'] != "") {
                                 alert(response['message'])
                             } else {
@@ -247,6 +265,8 @@
                     }
                 },
                 error: function (response) {
+                    hide_loader()
+                    console.log(response)
                     if (response['message'] != null && response['message'] != "") {
                         alert(response['message'])
                     } else {
