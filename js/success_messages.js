@@ -1,0 +1,1 @@
+SUCCESS_SENDING_CONSENT = "Successfully sent consent to driver"

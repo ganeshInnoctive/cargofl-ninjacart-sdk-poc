@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/jquery/jquery.js"></script>
+
+    <script src="js/urls.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/error_messages.js"></script>
+    <script src="js/success_messages.js"></script>
+    <script src="js/constants.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script src="js/index.js"></script>
 </head>
 
 <body>
@@ -28,24 +40,28 @@
                                                 <div class="col-12 col-lg-12">
                                                     <div class="row no-gutters">
                                                         <div class="col-12 form-group">
-                                                            <label class="tx-semibold">Driver Name :</label>
-                                                            <input type="text" class="form-control" placeholder="Driver Name" required>
+                                                            <label class="tx-semibold">Driver Name *</label>
+                                                            <input id="input_driver_name" type="text"
+                                                                class="form-control" placeholder="Enter Driver Name"
+                                                                required>
                                                         </div>
                                                         <div class="col-12 form-group">
-                                                            <label class="tx-semibold">Driver Number :</label>
-                                                            <input type="text" class="form-control" placeholder="Driver Number" required>
+                                                            <label class="tx-semibold">Mobile Number *</label>
+                                                            <input id="input_driver_mobile" type="tel"
+                                                                class="form-control"
+                                                                placeholder="Enter 10-Digit Mobile Number"
+                                                                pattern="[0-9]{10}" maxlength="10"
+                                                                onkeypress="return isNumber(event)" required>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-12 col-lg-12 mt-4">
-                                                    <button type="button" class="btn btn-primary btn-lg btn-block">Get Consent</button>
-                                                </div>
                                             </div>
-                                            <div class="col-12 col-lg-12 mt-4">
-                                                <button type="button" class="btn btn-primary btn-lg btn-block">Get
+                                            <div class="col-12 col-lg-12 mt-4 text-center">
+                                                <button id="button_send_consent" type="button"
+                                                    class="btn btn-primary btn-sm">Get
                                                     Consent</button>
                                             </div>
-                                        </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -53,55 +69,193 @@
                     </div>
                 </div>
             </div>
+            </div>
         </section>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
-    <script src="js/index.js"></script>
 
     <script>
-        $.ajax({
-            type: "POST",
-            url: "http://fleetosmobileapi.vamosys.com/authenticate",
-            data: JSON.stringify({
-                "username": "4bp2e2ivsRW9x3md10ZdFq7D8Oq1",
-                "password": "contact@innoctive.com"
-            }),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: function (response) {
-                $.ajax({
-                    type: "POST",
-                    beforeSend: function (request) {
-                        request.setRequestHeader("Authorization", "bearer " + response['token']);
-                    },
-                    url: "http://v3.cargofl.com:5000/api/v3/sim-tracking/add-driver",
-                    data: JSON.stringify({
-                        "mobile_number": $('#mobile_number').val(),
-                        "name": $('#name').val()
-                    }),
-                    contentType: 'application/json; charset=utf-8',
-                    dataType: 'json',
-                    success: function (response) {
-                        $.ajax({
-                            type: "GET",
-                            beforeSend: function (request) {
-                                request.setRequestHeader("Authorization", "bearer " + response['token']);
-                            },
-                            url: "http://v3.cargofl.com:5000/api/v3/sim-tracking/send-consent",
-                            data: {
-                                "user_id": response['user_id']
-                            },
-                            contentType: 'application/json; charset=utf-8',
-                            success: function (response) {
-
-                            }
-                        });
-                    }
-                });
+        function isNumber(event) {
+            event = (event) ? event : window.event;
+            var charCode = (event.which) ? event.which : event.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                alert("Please enter only Numbers.");
+                return false;
             }
+
+            return true;
+        }
+
+        $("#button_send_consent").on('click', function () {
+            let driver_name = $("#input_driver_name").val()
+            let driver_mobile_number = $("#input_driver_mobile").val()
+
+            if (driver_name == "" || driver_name == null) {
+                alert('Driver name is mandatory')
+            } else if (driver_name.length < 3) {
+                alert('Driver name should atleast be 3 char long')
+            } else if (driver_mobile_number == "" || driver_mobile_number == null) {
+                alert('Driver mobile number is mandatory')
+            } else if (driver_mobile_number.length != 10) {
+                alert('Driver mobile number should be 10 digit number')
+            }
+
+            get_access_token(driver_name, driver_mobile_number)
         });
+
+
+        function get_access_token(driver_name, driver_mobile_number) {
+            $.ajax({
+                type: "POST",
+                url: BASE_URL + ENDPOINT_GENERATE_AUTH_TOKEN,
+                data: JSON.stringify({
+                    "username": FLEETOS_USERNAME,
+                    "password": FLEETOS_PASSWORD
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    console.log(response)
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else if (response['auth_token'] == null || response['auth_token'] == "") {
+                        alert(ERROR_TOKEN_EMPTY)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            let token = response['auth_token']
+
+                            call_add_driver(driver_name, driver_mobile_number, token)
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_GENERATING_AUTH_TOKEN)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GENERATING_AUTH_TOKEN)
+                    }
+                }
+            });
+        }
+
+        function call_add_driver(driver_name, driver_mobile_number, token) {
+            $.ajax({
+                type: "POST",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "bearer " + token);
+                },
+                url: BASE_URL + ENDPOINT_ADD_DRIVER,
+                data: JSON.stringify({
+                    "mobile_number": driver_mobile_number,
+                    "name": driver_name
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            get_driver_details_from_fleetos(driver_mobile_number, token)
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_ADDING_DRIVER)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_ADDING_DRIVER)
+                    }
+                }
+            });
+        }
+
+        function get_driver_details_from_fleetos(driver_mobile_number, token) {
+            $.ajax({
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "bearer " + token);
+                },
+                url: BASE_URL + ENDPOINT_GET_USER_DETAILS_FROM_FLEETOS + driver_mobile_number,
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            driver_id = response['data']['driverId']
+
+                            if (driver_id != null || driver_id != "") {
+                                send_consent(driver_id, token)
+                            } else {
+                                alert(ERROR_GETTING_DRIVER_ID)
+                            }
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_GETTING_DRIVER_ID)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GETTING_DRIVER_ID)
+                    }
+                }
+            });
+        }
+
+        function send_consent(driver_id, token) {
+            $.ajax({
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "bearer " + token);
+                },
+                url: BASE_URL + ENDPOINT_SEND_CONSENT + driver_id,
+                data: {
+                    "user_id": driver_id
+                },
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            alert(SUCCESS_SENDING_CONSENT)
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_SENDING_CONSENT_TO_DRIVER)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_SENDING_CONSENT_TO_DRIVER)
+                    }
+                }
+            });
+        }
 
     </script>
 </body>
