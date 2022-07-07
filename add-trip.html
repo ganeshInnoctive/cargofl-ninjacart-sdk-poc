@@ -77,11 +77,13 @@
                                                     <label class="tx-semibold">Start Location*</label>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <input type="text" class="form-control" id="start_address"
-                                                        placeholder="Please enter starting address">
+                                                    <input type="text" class="form-control" id="start_location_name">
+                                                    <input type="text" class="form-control" id="start_location_lat"
+                                                        hidden>
+                                                    <input type="text" class="form-control" id="start_location_long"
+                                                        hidden>
                                                 </div>
                                             </div>
-                                            <br>
                                             <div id="startlocationPicker" style="width: auto; height: 300px;"></div>
 
                                             <!-- End Location -->
@@ -91,8 +93,12 @@
                                                     <label class="tx-semibold">Destination Location*</label>
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <input type="text" class="form-control" id="end_location"
-                                                        placeholder="Please enter destination address">
+                                                    <input type="text" class="form-control" id="end_location_name"
+                                                        hidden>
+                                                    <input type="text" class="form-control" id="end_location_lat"
+                                                        hidden>
+                                                    <input type="text" class="form-control" id="end_location_long"
+                                                        hidden>
                                                 </div>
                                             </div>
                                             <br>
@@ -149,7 +155,8 @@
 
         $("#button_send_consent").on('click', function (e) {
             let driver_name = $("#input_driver_name").val()
-            let driver_mobile_number = $("#input_driver_mobile").val()
+            let start_location_name = $("#start_location_name").val()
+            console.log(start_location_name)
 
             if (driver_name == "" || driver_name == null) {
                 alert('Driver name is mandatory')
@@ -343,10 +350,14 @@
 
         $(document).ready(function () {
             OSMPICKER.initmappicker('startlocationPicker', 18.5204, 73.8567, 300, {
-                addressId: "start_address"
+                addressId: "start_location_name",
+                longitudeId: "start_location_long",
+                latitudeId: "start_location_lat",
             });
             OSMPICKEREND.initmappicker('endlocationPicker', 18.5204, 73.8567, 300, {
-                addressId: "end_location"
+                addressId: "end_location_name",
+                longitudeId: "end_location_long",
+                latitudeId: "end_location_lat",
             });
         });
 

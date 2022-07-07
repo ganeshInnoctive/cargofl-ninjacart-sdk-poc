@@ -33,7 +33,33 @@ var OSMPICKEREND = (function(){
 		});
 		map.addLayer(marker);
 		map.addLayer(circle);
-		
+
+		const provider = new GeoSearch.OpenStreetMapProvider();
+
+		const search = new GeoSearch.GeoSearchControl({
+			provider: provider,
+			style: 'bar',
+			autoComplete: true, // optional: true|false  - default true
+			autoCompleteDelay: 100,
+			showMarker: true, // optional: true|false  - default true
+			showPopup: true, // optional: true|false  - default false
+			marker: {
+				// optional: L.Marker    - default L.Icon.Default
+				icon: new L.Icon.Default(),
+				draggable: true,
+			},
+			resultFormat: ({ result }) => result.label, // optional: function    - default returns result label
+			maxMarkers: 1, // optional: number      - default 1
+			retainZoomLevel: false, // optional: true|false  - default false
+			animateZoom: true, // optional: true|false  - default true
+			autoClose: true, // optional: true|false  - default false
+			searchLabel: 'Enter destination address', // optional: string      - default 'Enter address'
+			keepResult: true, // optional: true|false  - default false
+			updateMap: true, // optional: true|false  - default true
+		});
+
+
+		map.addControl(search);		
 
 		$("#"+option.latitudeId).val(lat);
 		$("#"+option.latitudeId).on('change', function(){
