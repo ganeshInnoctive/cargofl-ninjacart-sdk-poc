@@ -95,14 +95,14 @@ var OSMPICKER = (function () {
 		}
 
 		function searchEventHandler(result) {
-			console.log(result.location);
-			$("#" + option.addressId).val(result.display_name);
-			$("#" + option.longitudeId).val(result.x);
-			$("#" + option.latitudeId).val(result.y);
+			$("#" + option.addressId).val(result.location['label']);
+			$("#" + option.longitudeId).val(result.location['x']);
+			$("#" + option.latitudeId).val(result.location['y']);
 		}
 
 		function dragEventHandler(result) {
-			console.log(result.location);
+			$("#" + option.longitudeId).val(result.location['lng']);
+			$("#" + option.latitudeId).val(result.location['lat']);
 		}
 
 		map.on('geosearch/showlocation', searchEventHandler);

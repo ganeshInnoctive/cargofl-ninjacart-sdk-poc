@@ -1,5 +1,5 @@
 // let BASE_URL = "http://v3.cargofl.com:5000"
-let BASE_URL = "http://15.206.90.231:5000"
+let BASE_URL = "http://43.204.96.53:5000"
 
 
 
@@ -10,3 +10,4 @@ let ENDPOINT_SEND_CONSENT = "/api/v3/sim-tracking/send-consent?user_id="
 let GET_ALL_DRIVERS = "/api/v3/user/get-all-drivers-paginated"
 let GET_ALL_TRACKING_ENTRIES = "/api/v3/sim-tracking/get-all-tracking-entries"
 let ADD_TRACKING_ENTRY = "/api/v3/sim-tracking/add-tracking-entry"
+let GET_DRIVERS_SELECT = "/api/v3/user/get-all-drivers"
