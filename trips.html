@@ -24,14 +24,12 @@
 
     <script type="text/javascript">
         function actionFormatterViewOutput(value, row, index) {
-            if (row['sim_consent_status'] == "N") {
-                return [
-                    '<button type="button" onclick=reroute()>Track</button>'
-                    // '<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
-                    // '<i class="glyphicon glyphicon-road"></i>',
-                    // '</a>'
-                ].join('');
-            }
+            return [
+                '<button type="button" onclick=reroute()>Track</button>'
+                // '<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
+                // '<i class="glyphicon glyphicon-road"></i>',
+                // '</a>'
+            ].join('');
         }
 
         function startNameFormatter(value, row, index) {
@@ -95,9 +93,9 @@
                                                 <tr>
                                                     <th data-field="name">Driver</th>
                                                     <th data-field="mobile_number">Number</th>
-                                                    <th data-field="start_latitude" data-formatter="startNameFormatter">
+                                                    <th data-field="start_location_name">
                                                         Start</th>
-                                                    <th data-field="end_latitude" data-formatter="endNameFormatter">End
+                                                    <th data-field="end_location_name">End
                                                     </th>
                                                     <th data-field="action_view_route" class="text-center"
                                                         data-formatter="actionFormatterViewOutput"
