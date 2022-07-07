@@ -1,7 +1,12 @@
-let BASE_URL = "http://v3.cargofl.com:5000"
+// let BASE_URL = "http://v3.cargofl.com:5000"
+let BASE_URL = "http://65.2.126.212:5000"
+
+
 
 let ENDPOINT_GENERATE_AUTH_TOKEN = "/api/v3/sim-tracking/generate-auth-token"
-let ENDPOINT_ADD_DRIVER = "/api/v3/add-driver-for-sim-tracking"
+let ENDPOINT_ADD_DRIVER = "/api/v3/user/add-driver-for-sim-tracking"
 let ENDPOINT_GET_USER_DETAILS_FROM_FLEETOS = "/api/v3/sim-tracking/get-user-details?mobile_number="
 let ENDPOINT_SEND_CONSENT = "/api/v3/sim-tracking/send-consent?user_id="
-let GET_ALL_DRIVERS = "/api/v3/get-all-drivers"
+let GET_ALL_DRIVERS = "/api/v3/user/get-all-drivers"
+let GET_ALL_TRACKING_ENTRIES = "/api/v3/sim-tracking/get-all-tracking-entries"
+let ADD_TRACKING_ENTRY = "/api/v3/sim-tracking/add-tracking-entry"

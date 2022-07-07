@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Trip Tracking</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-table.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-table.css">
+    <link rel="stylesheet" type="text/css" href="css/nav.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <script src="js/bootstrap-table.min.js"></script>
+    <script src="js/jquery/jquery.js"></script>
+    <script src="js/bootstrap-table.js"></script>
+    <script src="js/urls.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/error_messages.js"></script>
+    <script src="js/success_messages.js"></script>
+    <script src="js/constants.js"></script>
+
+    <script type="text/javascript">
+        function actionFormatterViewOutput(value, row, index) {
+            if (row['sim_consent_status'] == "N") {
+                return [
+                    '<button type="button" onclick=reroute()>Track</button>'
+                    // '<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
+                    // '<i class="glyphicon glyphicon-road"></i>',
+                    // '</a>'
+                ].join('');
+            }
+        }
+
+        function startNameFormatter(value, row, index) {
+            return 'Lat: ' + row.start_latitude + "\nLon: " + row.start_longitude;
+        }
+
+        function endNameFormatter(value, row, index) {
+            return 'Lat: ' + row.end_latitude + "\nLon: " + row.end_longitude;
+        }
+
+        window.actionEvents = {
+            'click .view_output': function (e, value, row, index) {
+                // render the view PO page
+                window.location = '/view_raven_load_optimizer_output?raven_req_number=' + row['raven_req_number'] + '&franchiseid=' + row['franchiseid'];
+            },
+            'click .view_route': function (e, value, row, index) {
+                $.ajax({
+                    type: "GET",
+                    url: "/view_raven_load_optimizer_route",
+                    data: { 'raven_req_number': row['raven_req_number'], 'franchiseid': row['franchiseid'] },
+                    success: function (data) {
+                        route_information = data['data']['product_data'];
+                        modalOpen(route_information);
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert("Error occoured while fetching route info");
+                    }
+                });
+            }
+        }
+    </script>
+
+    <style>
+        .ml10 {
+            margin-left: 10px;
+            color: grey;
+        }
+    </style>
+
+</head>
+
+<body>
+    <main class="main-container">
+        <section class="p-2 p-md-3 p-lg-5">
+            <div class="container">
+                <div class="row no-gutters justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <div class="row no-gutters">
+                            <div class="col-12 col-lg-12">
+                                <h1 class="tx-bold tx-center header-title">Track Trip</h1>
+                            </div>
+                            <div class="col-12 col-lg-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <div class="tx-semibold">Trips List</div>
+                                    </div>
+                                    <div class="card-body">
+                                        <table id="table" data-toggle="table" data-ajax="ajaxRequest"
+                                            data-side-pagination="server" data-pagination="true">
+                                            <thead>
+                                                <tr>
+                                                    <th data-field="name">Driver</th>
+                                                    <th data-field="mobile_number">Number</th>
+                                                    <th data-field="start_latitude" data-formatter="startNameFormatter">
+                                                        Start</th>
+                                                    <th data-field="end_latitude" data-formatter="endNameFormatter">End
+                                                    </th>
+                                                    <th data-field="action_view_route" class="text-center"
+                                                        data-formatter="actionFormatterViewOutput"
+                                                        data-events="actionEvents">Track</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </section>
+        <button type="button" class="btn btn-success get-consent-btn" onclick="location.href = 'add-trip.html';"><i
+                class="fas fa-plus-circle fa-2x"></i></button>
+    </main>
+
+    <script>
+        function ajaxRequest(params) {
+            $.ajax({
+                type: "POST",
+                url: BASE_URL + GET_ALL_TRACKING_ENTRIES,
+                data: JSON.stringify({
+                    "franchise_id": "FOY0320",
+                    "offset": 0,
+                    "limit": 10
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    params.success(response)
+                },
+                error: function (response) {
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GETTING_TRACKING_LIST)
+                    }
+                }
+            });
+        }
+
+        function reroute() {
+            window.location.href = 'tracking-data.html';
+        }
+    </script>
+
+    <nav class="nav">
+        <a href="trips.html" class="nav__link nav__link--active">
+            <i class="material-icons nav__icon">drive_eta</i>
+            <span class="nav__text">Trips</span>
+        </a>
+        <a href="track-driver.html" class="nav__link">
+            <i class="material-icons nav__icon">groups</i>
+            <span class="nav__text">Drivers</span>
+        </a>
+    </nav>
+</body>
+
+</html>

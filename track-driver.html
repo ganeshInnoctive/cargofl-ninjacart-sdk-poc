@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" type="text/css" href="css/bootstrap-table.min.css">
     <link rel="stylesheet" type="text/css" href="css/bootstrap-table.css">
+    <link rel="stylesheet" type="text/css" href="css/nav.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 
     <script src="js/bootstrap-table.min.js"></script>
     <script src="js/jquery/jquery.js"></script>
@@ -24,7 +27,7 @@
         function actionFormatterViewOutput(value, row, index) {
             if (row['sim_consent_status'] == "N") {
                 return [
-                    '<button type="button" onclick=reroute()>Track</button>' 
+                    '<button type="button" onclick=reroute()>Track</button>'
                     // '<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
                     // '<i class="glyphicon glyphicon-road"></i>',
                     // '</a>'
@@ -71,12 +74,12 @@
                     <div class="col-12 col-lg-10">
                         <div class="row no-gutters">
                             <div class="col-12 col-lg-12">
-                                <h1 class="tx-bold tx-center header-title">Track Driver</h1>
+                                <h1 class="tx-bold tx-center header-title">Drivers</h1>
                             </div>
                             <div class="col-12 col-lg-12">
                                 <div class="card">
                                     <div class="card-header">
-                                        <div class="tx-semibold">Track Driver List</div>
+                                        <div class="tx-semibold">Active Drivers List</div>
                                     </div>
                                     <div class="card-body">
                                         <table id="table" data-toggle="table" data-ajax="ajaxRequest"
@@ -86,9 +89,6 @@
                                                     <th data-field="name">Name</th>
                                                     <th data-field="mobile_number">Number</th>
                                                     <th data-field="sim_consent_status">Consent</th>
-                                                    <th data-field="action_view_route" class="text-center"
-                                                        data-formatter="actionFormatterViewOutput"
-                                                        data-events="actionEvents">Track</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -129,11 +129,22 @@
             });
         }
 
-        function reroute(){
+        function reroute() {
             console.log("This works!")
             window.location.href = 'tracking-data.html';
         }
     </script>
+
+    <nav class="nav">
+        <a href="trips.html" class="nav__link">
+            <i class="material-icons nav__icon">drive_eta</i>
+            <span class="nav__text">Trips</span>
+        </a>
+        <a href="track-driver.html" class="nav__link nav__link--active">
+            <i class="material-icons nav__icon">groups</i>
+            <span class="nav__text">Drivers</span>
+        </a>
+    </nav>
 </body>
 
 </html>
