@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-
+    <link rel="stylesheet" href="css/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css">
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
@@ -17,7 +17,7 @@
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBu-916DdpKAjTmJNIgngS6HL_kDIKU0aU&callback=myMap"></script>
     <script src="js/index.js"></script>
 
-    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
@@ -45,10 +45,6 @@
     <style>
         #mapid {
             height: 770px;
-            margin-left: 80px;
-            margin-right: 80px;
-            margin-top: 10px;
-            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -66,8 +62,12 @@
                             <div class="col-12 col-lg-12 my-2 my-lg-4 my-xl-5">
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <div class="tx-semibold">From Date : 22/06/2022</div>
-                                        <div class="tx-semibold tx-right">To Date : 24/06/2022</div>
+                                        <div class="tx-semibold">From Date <input type="text" id="startDateTime"
+                                                name="startDateTime" placeholder="Select date"
+                                                class="form-control date-time-picker" readonly /></div>
+                                        <div class="tx-semibold tx-right">To Date <input type="text" id="endDateTime"
+                                                name="endDateTime" placeholder="Select date"
+                                                class="form-control date-time-picker" readonly /></div>
                                     </div>
                                     <div class="card-body">
                                         <div class="row no-gutters">
@@ -87,28 +87,97 @@
         </section>
     </main>
 
+    <script src="js/moment/moment.min.js"></script>
+    <script src="js/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
+
     <script>
-        $.ajax({
-            type: "POST",
-            url: "https://mt-test.cargofl.com/api/v1/sim_tracking/get-sim-tracking-location-details",
-            data: JSON.stringify({
-                "mobile_number": "8149910113",
-                "startTime": "03-05-2021 22:07:37",
-                "stopTime": "04-05-2021 09:09:50"
-            }),
-            contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            success: function (response) {
-                if (response['data'].length > 0) {
-                    ajax_response = JSON.stringify(response.data);
-                    var gps_data = JSON.parse(ajax_response);
-                    view_map_view(gps_data)
-                }
-                else {
-                    alert("Encountered an error!")
-                } d
+        $(document).ready(function (e) {
+            // Set DateTimePicker
+            $('.date-time-picker').datetimepicker({
+                format: 'dd-mm-yyyy hh:ii',
+                clearBtn: true,
+                autoclose: true,
+            });
+
+            let currentDateTimeInEpoch = moment().valueOf()
+            let twoDaysBeforeCurrentDateTimeInEpoch = moment().subtract(2, 'days').valueOf()
+
+            var mobileNumber = ""
+
+            let urlParams = new URLSearchParams(window.location.search)
+            if (urlParams.has('mobile_number')) {
+                mobileNumber = urlParams.get('mobile_number')
             }
+
+            if (mobileNumber != "" && mobileNumber != null) {
+                getTrackingDetails(mobileNumber, currentDateTimeInEpoch, twoDaysBeforeCurrentDateTimeInEpoch)
+            } else {
+                alert('Mobile number is mandatory for tracking user')
+            }
+
+            var startDateTime = ""
+            var endDateTime = ""
+
+            $("#startDateTime").change(function (e) {
+                let startDateTime = $('#startDateTime').val();
+                let endDateTime = $('#endDateTime').val();
+
+                if (mobileNumber == "" || mobileNumber == null) {
+                    alert('Mobile number is mandatory for tracking user')
+                }
+
+                if (startDateTime != null && startDateTime != "" && endDateTime != null && endDateTime != "") {
+                    let startDateTimeInEpoch = convertDateTimeStringToEpoch(startDateTime)
+                    let endDateTimeInEpoch = convertDateTimeStringToEpoch(endDateTime)
+
+                    getTrackingDetails(mobileNumber, startDateTime, endDateTime)
+                }
+            });
+
+            $("#endDateTime").change(function (e) {
+                let startDateTime = $('#startDateTime').val();
+                let endDateTime = $('#endDateTime').val();
+
+                if (mobileNumber == "" || mobileNumber == null) {
+                    alert('Mobile number is mandatory for tracking user')
+                }
+
+                if (startDateTime != null && startDateTime != "" && endDateTime != null && endDateTime != "") {
+                    let startDateTimeInEpoch = convertDateTimeStringToEpoch(startDateTime)
+                    let endDateTimeInEpoch = convertDateTimeStringToEpoch(endDateTime)
+
+                    getTrackingDetails(mobileNumber, startDateTimeInEpoch, endDateTimeInEpoch)
+                }
+            });
+
         });
+
+        function convertDateTimeStringToEpoch(dateTime) {
+            return moment(dateTime, "dd-mm-yyyy hh:ii").valueOf()
+        }
+
+        function getTrackingDetails(mobileNumber, startDateTime, stopDateTime) {
+            $.ajax({
+                type: "POST",
+                url: "https://mt-test.cargofl.com/api/v1/sim_tracking/get-sim-tracking-location-details",
+                data: JSON.stringify({
+                    "mobile_number": mobileNumber,
+                    "startTime": startDateTime,
+                    "stopTime": stopDateTime
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    if (response['data'].length > 0) {
+                        ajax_response = JSON.stringify(response.data);
+                        var gps_data = JSON.parse(ajax_response);
+                        view_map_view(gps_data)
+                    } else {
+                        alert("No data found for selected date time")
+                    }
+                }
+            });
+        }
 
         function view_map_view(gps_data) {
 

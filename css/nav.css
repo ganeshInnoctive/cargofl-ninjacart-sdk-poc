@@ -13,6 +13,10 @@ body {
     overflow-x: auto;
 }
 
+.nav a {
+    text-decoration: none;
+}
+
 .nav__link {
     display: flex;
     flex-direction: column;

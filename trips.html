@@ -25,7 +25,7 @@
     <script type="text/javascript">
         function actionFormatterViewOutput(value, row, index) {
             return [
-                '<button type="button" onclick=reroute()>Track</button>'
+                `<button type="button" onclick=reroute(${row.mobile_number})>Track</button>`
                 // '<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
                 // '<i class="glyphicon glyphicon-road"></i>',
                 // '</a>'
@@ -140,8 +140,8 @@
             });
         }
 
-        function reroute() {
-            window.location.href = 'tracking-data.html';
+        function reroute(mobile_number) {
+            window.location.href = `tracking-data.html?mobile_number=${mobile_number}`;
         }
     </script>
 
