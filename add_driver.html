@@ -31,7 +31,9 @@
                     <div class="col-12 col-lg-6">
                         <div class="row no-gutters">
                             <div class="col-12 col-lg-12">
-                                <h1 class="tx-bold tx-center header-title">Get Driver Consent</h1>
+                                <button class="btn btn-primary"
+                                    onclick="window.history.go(-1); return false;">Back</button>
+                                <h1 class="tx-bold tx-center header-title">Add Driver</h1>
                             </div>
                             <div class="col-12 col-lg-12 my-2 my-lg-4 my-xl-5">
                                 <div class="card">
@@ -59,8 +61,7 @@
                                             </div>
                                             <div class="col-12 col-lg-12 mt-4 text-center">
                                                 <button id="button_send_consent" type="button"
-                                                    class="btn btn-primary btn-sm ">Get
-                                                    Consent</button>
+                                                    class="btn btn-primary btn-sm ">Add Driver</button>
                                             </div>
                                         </form>
                                     </div>
@@ -161,7 +162,7 @@
                 data: JSON.stringify({
                     "driver_mobile_number": driver_mobile_number,
                     "driver_name": driver_name,
-                    "franchise_id" : "FOY0320"
+                    "franchise_id": "FOY0320"
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
@@ -253,7 +254,7 @@
                         alert(ERROR_RESPONSE_NULL)
                     } else {
                         if (response['code'] == API_SUCCESS_CODE) {
-                            window.location.href = 'track-driver.html';
+                            window.location.href = 'driver_list.html';
                             alert("Driver added succssfully!")
                         } else {
                             hide_loader()
