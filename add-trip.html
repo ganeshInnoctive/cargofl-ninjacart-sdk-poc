@@ -31,6 +31,11 @@
         crossorigin="">
 
     <!-- Open Street Maps Location Picker Implementation -->
+    <style>
+        .select2-results {
+            text-align: left;
+        }
+    </style>
 
 
 </head>
@@ -56,9 +61,8 @@
                                                     <div class="row no-gutters">
                                                         <div class="col-12 form-group">
                                                             <label class="tx-semibold">Driver Name*</label>
-                                                            <input id="input_driver_name" type="text"
-                                                                class="form-control" placeholder="Enter Driver Name"
-                                                                required>
+                                                            <select name="driver_name" id="driver_name"
+                                                                class="form-control"> </select>
                                                         </div>
                                                         <div class="col-12 form-group">
                                                             <label class="tx-semibold">Mobile Number*</label>
@@ -106,12 +110,11 @@
                                             <div id="endlocationPicker" style="width: auto; height: 300px;"></div>
 
                                             <div class="col-12 col-lg-12 mt-4 text-center">
-                                                <button id="button_send_consent" type="button"
-                                                    class="btn btn-primary btn-sm ">Get
-                                                    Consent</button>
+                                                <button id="button_add_trip" type="button"
+                                                    class="btn btn-primary btn-sm ">Add Trip</button>
                                             </div>
                                             <div class="col-12 col-lg-12 mt-4 text-center">
-                                                <button id="button_cqncel" type="button" onclick=reroute()
+                                                <button id="button_cancel" type="button" onclick=reroute()
                                                     class="btn btn-primary btn-sm ">Cancel</button>
                                             </div>
                                         </form>
@@ -127,45 +130,44 @@
     </main>
 
     <script type="module" src="https://unpkg.com/leaflet-geosearch@3.0.5/dist/geosearch.umd.js"></script>
-    <script src="https://unpkg.com/esri-leaflet@2.5.3/dist/esri-leaflet.js"
-        integrity="sha512-K0Vddb4QdnVOAuPJBHkgrua+/A9Moyv8AQEWi0xndQ+fqbRfAFd47z4A9u1AW/spLO0gEaiE1z98PK1gl5mC5Q=="
-        crossorigin=""></script>
-    <script src="https://unpkg.com/esri-leaflet-geocoder@2.3.3/dist/esri-leaflet-geocoder.js"
-        integrity="sha512-HrFUyCEtIpxZloTgEKKMq4RFYhxjJkCiF5sDxuAokklOeZ68U2NPfh4MFtyIVWlsKtVbK5GD2/JzFyAfvT5ejA=="
-        crossorigin=""></script>
     <link rel="stylesheet" href="http://cdnjs.buttflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
     <script src="js/OSMLocationPicker.js"></script>
     <script src="js/OSMLocationPickerEnd.js"></script>
-    <script src="http://k4r573n.github.io/leaflet-control-osm-geocoder/Control.OSMGeocoder.js"></script>
     <script src="http://cdnjs.buttflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
 
 
     <script>
-        hide_loader()
+        let driverList = [];
 
-        $("#driver_name").select2({
-            theme: "bootstrap",
-            width: "100%",
-            minimumInputLength: 3,
-            placeholder: "Enter a driver",
-            allowClear: true,
-            ajax: {
+        $(document).ready(function () {
+            $.ajax({
                 url: BASE_URL + GET_DRIVERS_SELECT,
                 type: "POST",
                 dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
                 data: JSON.stringify({
                     "franchise_id": "FOY0320"
                 }),
-                processResults: function (response, params) {
-                    return {
-                        results: response.data,
-                        pagination: {
-                            more: (params.page * 20) < response.total
-                        }
-                    };
+                success: function (response) {
+                    // This function transforms the response array into a select2 valid json obj
+                    var data = $.map(response.data, function (obj) {
+                        obj.id = obj.id || obj.login_id;
+                        obj.text = obj.text || obj.name;
+                        return obj;
+                    });
+                    driverList = data;
+                    // This is a hack. NOT GOOD.
+                    $("#driver_name").select2({
+                        minimumInputLength: 1,
+                        placeholder: "Enter a driver name",
+                        allowClear: true,
+                        data: driverList
+                    });
                 },
-            }
-        });
+            });
+        })
+
+        hide_loader()
 
         function isNumber(event) {
             event = (event) ? event : window.event;
@@ -178,59 +180,60 @@
             return true;
         }
 
-        $("#button_send_consent").on('click', function (e) {
-            let driver_name = $("#input_driver_name").val()
+        $("#button_add_trip").on('click', function (e) {
+            let driver_mobile_number = $('#input_driver_mobile').val()
+            let driver_name = $('#driver_name :selected').text()
+            let start_latitude = $('#start_location_lat').val()
+            let start_longitude = $('#start_location_long').val()
             let start_location_name = $("#start_location_name").val()
-            console.log(start_location_name)
+            let end_latitude = $('#end_location_lat').val()
+            let end_longitude = $('#end_location_long').val()
+            let end_location_name = $('#end_location_name').val()
 
-            if (driver_name == "" || driver_name == null) {
-                alert('Driver name is mandatory')
-            } else if (driver_name.length < 3) {
-                alert('Driver name should atleast be 3 char long')
-            } else if (driver_mobile_number == "" || driver_mobile_number == null) {
+            if (driver_mobile_number == "" || driver_mobile_number == null) {
                 alert('Driver mobile number is mandatory')
             } else if (driver_mobile_number.length != 10) {
                 alert('Driver mobile number should be 10 digit number')
             } else {
                 e.preventDefault()
                 show_loader()
-                get_access_token(driver_name, driver_mobile_number)
+                addTrip(driver_mobile_number, driver_name, start_latitude, start_longitude, start_location_name, end_latitude, end_longitude, end_location_name)
             }
         });
 
 
-        function get_access_token(driver_name, driver_mobile_number) {
+        function addTrip(driver_mobile_number, driver_name, start_latitude, start_longitude, start_location_name, end_latitude, end_longitude, end_location_name) {
             $.ajax({
                 type: "POST",
-                url: BASE_URL + ENDPOINT_GENERATE_AUTH_TOKEN,
+                url: BASE_URL + ADD_TRACKING_ENTRY,
                 data: JSON.stringify({
-                    "username": FLEETOS_USERNAME,
-                    "password": FLEETOS_PASSWORD
+                    "mobile_number": driver_mobile_number,
+                    "driver_name": driver_name,
+                    "start_latitude": start_latitude,
+                    "start_longitude": start_longitude,
+                    "start_location_name": start_location_name,
+                    "end_latitude": end_latitude,
+                    "end_longitude": end_longitude,
+                    "end_location_name": end_location_name,
+                    "modified_by": "LTH4198",
+                    "franchise_id": "FOY0320"
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 success: function (response) {
-                    console.log(response)
-                    if (response == null) {
+                    if (response['code'] == API_SUCCESS_CODE) {
                         hide_loader()
-                        alert(ERROR_RESPONSE_NULL)
-                    } else if (response['auth_token'] == null || response['auth_token'] == "") {
-                        hide_loader()
-                        alert(ERROR_TOKEN_EMPTY)
+                        alert(SUCCESS_CREATE_TRIP)
+                        reroute()
                     } else {
-                        if (response['code'] == API_SUCCESS_CODE) {
-                            let token = response['auth_token']
-
-                            call_add_driver(driver_name, driver_mobile_number, token)
+                        hide_loader()
+                        if (response['message'] != null && response['message'] != "") {
+                            alert(response['message'])
                         } else {
-                            hide_loader()
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
-                            } else {
-                                alert(ERROR_GENERATING_AUTH_TOKEN)
-                            }
+                            alert(ERROR_ADDING_TRIP_LIST)
                         }
                     }
+
                 },
                 error: function (response) {
                     hide_loader()
@@ -238,132 +241,6 @@
                         alert(response['message'])
                     } else {
                         alert(ERROR_GENERATING_AUTH_TOKEN)
-                    }
-                }
-            });
-        }
-
-        function call_add_driver(driver_name, driver_mobile_number, token) {
-            $.ajax({
-                type: "POST",
-                beforeSend: function (request) {
-                    request.setRequestHeader("Authorization", "bearer " + token);
-                },
-                url: BASE_URL + ENDPOINT_ADD_DRIVER,
-                data: JSON.stringify({
-                    "driver_mobile_number": driver_mobile_number,
-                    "driver_name": driver_name,
-                    "franchise_id": "FOY0320"
-                }),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                success: function (response) {
-                    if (response == null) {
-                        hide_loader()
-                        alert(ERROR_RESPONSE_NULL)
-                    } else {
-                        if (response['code'] == API_SUCCESS_CODE) {
-                            get_driver_details_from_fleetos(driver_mobile_number, token)
-                        } else {
-                            hide_loader()
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
-                            } else {
-                                alert(ERROR_ADDING_DRIVER)
-                            }
-                        }
-                    }
-                },
-                error: function (response) {
-                    hide_loader()
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
-                    } else {
-                        alert(ERROR_ADDING_DRIVER)
-                    }
-                }
-            });
-        }
-
-        function get_driver_details_from_fleetos(driver_mobile_number, token) {
-            $.ajax({
-                type: "GET",
-                beforeSend: function (request) {
-                    request.setRequestHeader("Authorization", "bearer " + token);
-                },
-                url: BASE_URL + ENDPOINT_GET_USER_DETAILS_FROM_FLEETOS + driver_mobile_number,
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                success: function (response) {
-                    if (response == null) {
-                        hide_loader()
-                        alert(ERROR_RESPONSE_NULL)
-                    } else {
-                        if (response['code'] == API_SUCCESS_CODE) {
-                            driver_id = response['data']['driverId']
-
-                            if (driver_id != null || driver_id != "") {
-                                send_consent(driver_id, token)
-                            } else {
-                                alert(ERROR_GETTING_DRIVER_ID)
-                            }
-                        } else {
-                            hide_loader()
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
-                            } else {
-                                alert(ERROR_GETTING_DRIVER_ID)
-                            }
-                        }
-                    }
-                },
-                error: function (response) {
-                    hide_loader()
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
-                    } else {
-                        alert(ERROR_GETTING_DRIVER_ID)
-                    }
-                }
-            });
-        }
-
-        function send_consent(driver_id, token) {
-            $.ajax({
-                type: "GET",
-                beforeSend: function (request) {
-                    request.setRequestHeader("Authorization", "bearer " + token);
-                },
-                url: BASE_URL + ENDPOINT_SEND_CONSENT + driver_id,
-                data: {
-                    "user_id": driver_id
-                },
-                contentType: 'application/json; charset=utf-8',
-                success: function (response) {
-                    if (response == null) {
-                        hide_loader()
-                        alert(ERROR_RESPONSE_NULL)
-                    } else {
-                        if (response['code'] == API_SUCCESS_CODE) {
-                            window.location.href = 'track-driver.html';
-                            alert("Driver added succssfully!")
-                        } else {
-                            hide_loader()
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
-                            } else {
-                                alert(ERROR_SENDING_CONSENT_TO_DRIVER)
-                            }
-                        }
-                    }
-                },
-                error: function (response) {
-                    hide_loader()
-                    console.log(response)
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
-                    } else {
-                        alert(ERROR_SENDING_CONSENT_TO_DRIVER)
                     }
                 }
             });
