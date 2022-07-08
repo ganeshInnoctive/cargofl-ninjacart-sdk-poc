@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="css/fontawesome/fontawesome.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/loader.css">
+    <link rel="stylesheet" type="text/css" href="css/spinner.css">
     <link rel="stylesheet" href="css/select2-bootstrap.css">
     <link rel="stylesheet" href="css/select2.min.css">
 
@@ -43,6 +43,10 @@
 
 
 <body>
+    <div id="spinner">
+        <img src="images/loader.gif" />
+    </div>
+
     <main class="main-container">
         <section class="p-2 p-md-3 p-lg-5">
             <div class="container">
@@ -149,7 +153,11 @@
                 data: JSON.stringify({
                     "franchise_id": "FOY0320"
                 }),
+                beforeSend: function () {
+                    showLoader()
+                },
                 success: function (response) {
+                    hideLoader()
                     // This function transforms the response array into a select2 valid json obj
                     var data = $.map(response.data, function (obj) {
                         obj.id = obj.id || obj.login_id;
@@ -165,10 +173,16 @@
                         data: driverList
                     });
                 },
+                error: function (response) {
+                    hideLoader()
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GETTING_DRIVER_LIST)
+                    }
+                }
             });
         })
-
-        hide_loader()
 
         function isNumber(event) {
             event = (event) ? event : window.event;
@@ -197,7 +211,6 @@
                 alert('Driver mobile number should be 10 digit number')
             } else {
                 e.preventDefault()
-                show_loader()
                 addTrip(driver_mobile_number, driver_name, start_latitude, start_longitude, start_location_name, end_latitude, end_longitude, end_location_name)
             }
         });
@@ -221,13 +234,15 @@
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
+                beforeSend: function () {
+                    showLoader()
+                },
                 success: function (response) {
+                    hideLoader()
                     if (response['code'] == API_SUCCESS_CODE) {
-                        hide_loader()
                         alert(SUCCESS_CREATE_TRIP)
                         reroute()
                     } else {
-                        hide_loader()
                         if (response['message'] != null && response['message'] != "") {
                             alert(response['message'])
                         } else {
@@ -237,7 +252,7 @@
 
                 },
                 error: function (response) {
-                    hide_loader()
+                    hideLoader()
                     if (response['message'] != null && response['message'] != "") {
                         alert(response['message'])
                     } else {

@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="css/bootstrap-table.min.css">
     <link rel="stylesheet" type="text/css" href="css/bootstrap-table.css">
     <link rel="stylesheet" type="text/css" href="css/nav.css">
+    <link rel="stylesheet" type="text/css" href="css/spinner.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <script src="js/bootstrap-table.min.js"></script>
@@ -19,6 +20,7 @@
     <script src="js/urls.js"></script>
     <script src="js/config.js"></script>
     <script src="js/error_messages.js"></script>
+    <script src="js/essential_methods.js"></script>
     <script src="js/success_messages.js"></script>
     <script src="js/constants.js"></script>
 
@@ -80,9 +82,14 @@
 </head>
 
 <body>
+    <div id="spinner">
+        <img src="images/loader.gif" />
+    </div>
+
     <main class="main-container">
         <section class="p-2 p-md-3 p-lg-5">
             <div class="container">
+                <div class="cargofl-loader"></div>
                 <div class="row no-gutters justify-content-center">
                     <div class="col-12 col-lg-10">
                         <div class="row no-gutters">
@@ -135,10 +142,15 @@
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
+                beforeSend: function () {
+                    showLoader()
+                },
                 success: function (response) {
+                    hideLoader()
                     params.success(response)
                 },
                 error: function (response) {
+                    hideLoader()
                     if (response['message'] != null && response['message'] != "") {
                         alert(response['message'])
                     } else {

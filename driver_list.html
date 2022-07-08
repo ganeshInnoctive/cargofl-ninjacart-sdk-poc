@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="css/bootstrap-table.min.css">
     <link rel="stylesheet" type="text/css" href="css/bootstrap-table.css">
     <link rel="stylesheet" type="text/css" href="css/nav.css">
+    <link rel="stylesheet" type="text/css" href="css/spinner.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 
@@ -20,42 +21,9 @@
     <script src="js/urls.js"></script>
     <script src="js/config.js"></script>
     <script src="js/error_messages.js"></script>
+    <script src="js/essential_methods.js"></script>
     <script src="js/success_messages.js"></script>
     <script src="js/constants.js"></script>
-
-    <script type="text/javascript">
-        function actionFormatterViewOutput(value, row, index) {
-            if (row['sim_consent_status'] == "N") {
-                return [
-                    '<button type="button" onclick=reroute()>Track</button>'
-                    // '<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
-                    // '<i class="glyphicon glyphicon-road"></i>',
-                    // '</a>'
-                ].join('');
-            }
-        }
-
-        window.actionEvents = {
-            'click .view_output': function (e, value, row, index) {
-                // render the view PO page
-                window.location = '/view_raven_load_optimizer_output?raven_req_number=' + row['raven_req_number'] + '&franchiseid=' + row['franchiseid'];
-            },
-            'click .view_route': function (e, value, row, index) {
-                $.ajax({
-                    type: "GET",
-                    url: "/view_raven_load_optimizer_route",
-                    data: { 'raven_req_number': row['raven_req_number'], 'franchiseid': row['franchiseid'] },
-                    success: function (data) {
-                        route_information = data['data']['product_data'];
-                        modalOpen(route_information);
-                    },
-                    error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        alert("Error occoured while fetching route info");
-                    }
-                });
-            }
-        }
-    </script>
 
     <style>
         .ml10 {
@@ -67,6 +35,10 @@
 </head>
 
 <body>
+    <div id="spinner">
+        <img src="images/loader.gif" />
+    </div>
+
     <main class="main-container">
         <section class="p-2 p-md-3 p-lg-5">
             <div class="container">
@@ -116,10 +88,15 @@
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
+                beforeSend: function () {
+                    showLoader()
+                },
                 success: function (response) {
+                    hideLoader()
                     params.success(response)
                 },
                 error: function (response) {
+                    hideLoader()
                     if (response['message'] != null && response['message'] != "") {
                         alert(response['message'])
                     } else {

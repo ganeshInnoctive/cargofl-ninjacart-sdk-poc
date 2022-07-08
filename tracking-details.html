@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/spinner.css">
     <link rel="stylesheet" href="css/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css">
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
@@ -30,6 +31,7 @@
     <script src="js/urls.js"></script>
     <script src="js/config.js"></script>
     <script src="js/error_messages.js"></script>
+    <script src="js/essential_methods.js"></script>
     <script src="js/success_messages.js"></script>
     <script src="js/constants.js"></script>
 
@@ -50,6 +52,10 @@
 </head>
 
 <body>
+    <div id="spinner">
+        <img src="images/loader.gif" />
+    </div>
+
     <main class="main-container">
         <section class="p-2 p-md-3 p-lg-5">
             <div class="container">
@@ -131,7 +137,7 @@
                     let startDateTimeInEpoch = convertDateTimeStringToEpoch(startDateTime)
                     let endDateTimeInEpoch = convertDateTimeStringToEpoch(endDateTime)
 
-                    getTrackingDetails(mobileNumber, startDateTime, endDateTime)
+                    getTrackingDetails(mobileNumber, startDateTimeInEpoch, endDateTimeInEpoch)
                 }
             });
 
@@ -168,7 +174,12 @@
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
+                beforeSend: function () {
+                    showLoader()
+                },
                 success: function (response) {
+                    hideLoader()
+
                     if (response['data'].length > 0) {
                         ajax_response = JSON.stringify(response.data);
                         var gps_data = JSON.parse(ajax_response);
@@ -176,13 +187,19 @@
                     } else {
                         alert("No data found for selected date time")
                     }
+                },
+                error: function (response) {
+                    hideLoader()
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GETTING_TRACKING_DETAILS)
+                    }
                 }
             });
         }
 
         function view_map_view(gps_data) {
-
-
             Lat = 18.5204;
             Lon = 73.8567;
 
