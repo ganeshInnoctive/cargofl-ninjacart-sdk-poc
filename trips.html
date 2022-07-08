@@ -25,7 +25,7 @@
     <script type="text/javascript">
         function actionFormatterViewOutput(value, row, index) {
             return [
-                '<button type="button" onclick=reroute()>Track</button>'
+                '<button type="button" onclick=reroute(row.mobile_number)>Track</button>'
                 // '<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
                 // '<i class="glyphicon glyphicon-road"></i>',
                 // '</a>'
@@ -66,6 +66,14 @@
         .ml10 {
             margin-left: 10px;
             color: grey;
+        }
+
+        th,
+        td {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 100px;
         }
     </style>
 
@@ -140,7 +148,7 @@
             });
         }
 
-        function reroute() {
+        function reroute(mobile_number) {
             window.location.href = 'tracking-data.html';
         }
     </script>

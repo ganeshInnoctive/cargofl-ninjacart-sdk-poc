@@ -40,7 +40,7 @@ var OSMPICKEREND = (function () {
 			provider: provider,
 			style: 'bar',
 			autoComplete: true, // optional: true|false  - default true
-			autoCompleteDelay: 100,
+			autoCompleteDelay: 250,
 			showMarker: true, // optional: true|false  - default true
 			showPopup: true, // optional: true|false  - default false
 			marker: {
