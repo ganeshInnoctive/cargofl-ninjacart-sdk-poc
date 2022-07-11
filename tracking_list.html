@@ -8,15 +8,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" type="text/css" href="css/bootstrap-table.min.css">
-    <link rel="stylesheet" type="text/css" href="css/bootstrap-table.css">
     <link rel="stylesheet" type="text/css" href="css/nav.css">
     <link rel="stylesheet" type="text/css" href="css/spinner.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <script src="js/bootstrap-table.min.js"></script>
     <script src="js/jquery/jquery.js"></script>
-    <script src="js/bootstrap-table.js"></script>
     <script src="js/urls.js"></script>
     <script src="js/config.js"></script>
     <script src="js/error_messages.js"></script>
@@ -77,6 +73,16 @@
             text-overflow: ellipsis;
             max-width: 100px;
         }
+
+        ul {
+            padding: 0;
+            list-style-type: none;
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+        }
     </style>
 
 </head>
@@ -97,40 +103,68 @@
                                 <h1 class="tx-bold tx-center header-title">Track Trip</h1>
                             </div>
                             <div class="col-12 col-lg-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <div class="tx-semibold">Trips List</div>
-                                    </div>
-                                    <div class="card-body">
-                                        <table id="table" data-toggle="table" data-ajax="ajaxRequest"
-                                            data-side-pagination="server" data-pagination="true">
-                                            <thead>
-                                                <tr>
-                                                    <th data-field="name">Driver</th>
-                                                    <th data-field="mobile_number">Number</th>
-                                                    <th data-field="start_location_name">
-                                                        Start</th>
-                                                    <th data-field="end_location_name">End
-                                                    </th>
-                                                    <th data-field="action_view_route" class="text-center"
-                                                        data-formatter="actionFormatterViewOutput"
-                                                        data-events="actionEvents">Track</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
+                                <ul id="tracking_list" style="list-style-type: none; margin-left: 0%;">
 
-                                    </div>
-                                </div>
+                                </ul>
+                                <p id="loading">
+                                    <img src="images/loader.gif" alt="Loading…" />
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
         </section>
-        <button type="button" class="btn btn-success get-consent-btn" onclick="location.href = 'add_tracking.html';"><i
-                class="fas fa-plus-circle fa-2x"></i></button>
     </main>
 
+    <li id="tracking_list_item">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+                <p class="card-text">Some quick example text to build on the card title
+                    and make up the bulk of the card's content.</p>
+                <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a>
+            </div>
+        </div>
+    </li>
+
     <script>
+        $(document).ready(function () {
+            console.log('Inside 1');
+            createCard()
+            var win = $(window);
+
+            // Each time the user scrolls
+            win.scroll(function () {
+                console.log('Inside 2');
+                // End of the document reached?
+                if ($(document).height() - win.height() == win.scrollTop()) {
+                    console.log('Inside 3');
+                    $('#loading').show();
+
+                    console.log('Inside 4');
+                    createCard()
+                    $('#loading').hide();
+                }
+            });
+        });
+
+        function createCard() {
+            const divCard = document.createElement('div');
+            divCard.className = 'card'
+            divCard.innerHTML = `<div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+                <p class="card-text">Some quick example text to build on the card title
+                    and make up the bulk of the card's content.</p>
+                <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a>
+            </div>`
+
+            $('#tracking_list').append(divCard);
+        }   
+
         function ajaxRequest(params) {
             $.ajax({
                 type: "POST",
