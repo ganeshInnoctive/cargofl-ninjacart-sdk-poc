@@ -1,5 +1,5 @@
 // let BASE_URL = "http://v3.cargofl.com:5000"
-let BASE_URL = "http://43.204.96.53:5000"
+let BASE_URL = "http://3.110.45.151:5000"
 
 
 
