@@ -8,15 +8,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" type="text/css" href="css/bootstrap-table.min.css">
-    <link rel="stylesheet" type="text/css" href="css/bootstrap-table.css">
     <link rel="stylesheet" type="text/css" href="css/nav.css">
     <link rel="stylesheet" type="text/css" href="css/spinner.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <script src="js/bootstrap-table.min.js"></script>
     <script src="js/jquery/jquery.js"></script>
-    <script src="js/bootstrap-table.js"></script>
     <script src="js/urls.js"></script>
     <script src="js/config.js"></script>
     <script src="js/error_messages.js"></script>
@@ -24,58 +20,50 @@
     <script src="js/success_messages.js"></script>
     <script src="js/constants.js"></script>
 
-    <script type="text/javascript">
-        function actionFormatterViewOutput(value, row, index) {
-            return [
-                `<button type="button" onclick=reroute(${row.mobile_number})>Track</button>`
-                // '<a class="view_route ml10" href="javascript:void(0)" title="View Route">',
-                // '<i class="glyphicon glyphicon-road"></i>',
-                // '</a>'
-            ].join('');
-        }
-
-        function startNameFormatter(value, row, index) {
-            return 'Lat: ' + row.start_latitude + "\nLon: " + row.start_longitude;
-        }
-
-        function endNameFormatter(value, row, index) {
-            return 'Lat: ' + row.end_latitude + "\nLon: " + row.end_longitude;
-        }
-
-        window.actionEvents = {
-            'click .view_output': function (e, value, row, index) {
-                // render the view PO page
-                window.location = '/view_raven_load_optimizer_output?raven_req_number=' + row['raven_req_number'] + '&franchiseid=' + row['franchiseid'];
-            },
-            'click .view_route': function (e, value, row, index) {
-                $.ajax({
-                    type: "GET",
-                    url: "/view_raven_load_optimizer_route",
-                    data: { 'raven_req_number': row['raven_req_number'], 'franchiseid': row['franchiseid'] },
-                    success: function (data) {
-                        route_information = data['data']['product_data'];
-                        modalOpen(route_information);
-                    },
-                    error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        alert("Error occoured while fetching route info");
-                    }
-                });
-            }
-        }
-    </script>
-
     <style>
-        .ml10 {
+        ul {
+            padding: 0;
+            list-style-type: none;
+        }
+
+        #list_loading {
+            display: none;
+            text-align: center;
+        }
+
+        .search {
+            width: 100%;
+            position: relative;
+            display: flex;
+        }
+
+        .searchTerm {
+            width: 100%;
+            border: 1px solid lightgrey;
+            border-right: none;
+            padding: 5px;
+            height: 36px;
             margin-left: 10px;
+            border-radius: 5px 0 0 5px;
+            outline: none;
+            color: black;
+        }
+
+        .searchTerm:focus {
             color: grey;
         }
 
-        th,
-        td {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            max-width: 100px;
+        .searchButton {
+            width: 40px;
+            height: 36px;
+            border: 1px solid lightgrey;
+            background: #5FA744;
+            text-align: center;
+            color: #fff;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 20px;
+            margin-right: 10px;
         }
     </style>
 
@@ -86,84 +74,38 @@
         <img src="images/loader.gif" />
     </div>
 
-    <main class="main-container">
+    <main class="main-container" style="padding-bottom: 10px;">
         <section class="p-2 p-md-3 p-lg-5">
             <div class="container">
-                <div class="cargofl-loader"></div>
                 <div class="row no-gutters justify-content-center">
                     <div class="col-12 col-lg-10">
                         <div class="row no-gutters">
                             <div class="col-12 col-lg-12">
                                 <h1 class="tx-bold tx-center header-title">Track Trip</h1>
                             </div>
-                            <div class="col-12 col-lg-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <div class="tx-semibold">Trips List</div>
-                                    </div>
-                                    <div class="card-body">
-                                        <table id="table" data-toggle="table" data-ajax="ajaxRequest"
-                                            data-side-pagination="server" data-pagination="true">
-                                            <thead>
-                                                <tr>
-                                                    <th data-field="name">Driver</th>
-                                                    <th data-field="mobile_number">Number</th>
-                                                    <th data-field="start_location_name">
-                                                        Start</th>
-                                                    <th data-field="end_location_name">End
-                                                    </th>
-                                                    <th data-field="action_view_route" class="text-center"
-                                                        data-formatter="actionFormatterViewOutput"
-                                                        data-events="actionEvents">Track</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
 
-                                    </div>
-                                </div>
+                            <div class="search">
+                                <input id="input_search_driver" type="text" class="searchTerm"
+                                    placeholder="Search Driver Name / Mobile">
+                                <button id="button_search_driver" type="submit" class="searchButton">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+
+                            <div class="col-12 col-lg-12">
+                                <ul id="tracking_list" style="list-style-type: none; margin-left: 0%;"></ul>
+
+                                <p id="list_loading">
+                                    <img src="images/loader.gif" alt="Loading…" />
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
         </section>
         <button type="button" class="btn btn-success get-consent-btn" onclick="location.href = 'add_tracking.html';"><i
-                class="fas fa-plus-circle fa-2x"></i></button>
+                class="fas fa-plus fa-2x"></i></button>
     </main>
-
-    <script>
-        function ajaxRequest(params) {
-            $.ajax({
-                type: "POST",
-                url: BASE_URL + GET_ALL_TRACKING_ENTRIES,
-                data: JSON.stringify({
-                    "franchise_id": "FOY0320",
-                    "offset": 0,
-                    "limit": 10
-                }),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                beforeSend: function () {
-                    showLoader()
-                },
-                success: function (response) {
-                    hideLoader()
-                    params.success(response)
-                },
-                error: function (response) {
-                    hideLoader()
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
-                    } else {
-                        alert(ERROR_GETTING_TRACKING_LIST)
-                    }
-                }
-            });
-        }
-
-        function reroute(mobile_number) {
-            window.location.href = `tracking-details.html?mobile_number=${mobile_number}`;
-        }
-    </script>
 
     <nav class="nav">
         <a href="tracking_list.html" class="nav__link nav__link--active">
@@ -175,6 +117,123 @@
             <span class="nav__text">Drivers</span>
         </a>
     </nav>
+
+    <script>
+        // TODO : Hardcoded franchise id to be replaced by the franchise id passed through ninjacart app
+        let franchise_id = 'FOY0320';
+
+        $(document).ready(function () {
+            var offset = 0;
+            var search_value = ""
+
+            callGetAllTrackingEntries(franchise_id, offset, search_value)
+            var win = $(window);
+
+            // Each time the user scrolls
+            win.scroll(function (e) {
+                // End of the document reached?
+                if ($(document).height() - win.height() == win.scrollTop()) {
+                    e.preventDefault();
+
+                    offset = offset + 5
+                    callGetAllTrackingEntries(franchise_id, offset, search_value)
+                }
+            });
+
+            /*window.addEventListener('scroll', (e) => {
+                if (window.scrollY + window.innerHeight >= document.body.offsetHeight - 1000) {
+                    e.preventDefault();
+
+                    offset = offset + 5
+                    callGetAllTrackingEntries(franchise_id, offset, search_value)
+                }
+            });*/
+        });
+
+        $('#button_search_driver').on('click', function (e) {
+            e.preventDefault();
+
+            let search_value = $('#input_search_driver').val()
+
+            if (search_value == null || search_value == "") {
+                $('#tracking_list').empty()
+                callGetAllTrackingEntries(franchise_id, 0, search_value)
+            } else {
+                $('#tracking_list').empty()
+                callGetAllTrackingEntries(franchise_id, 0, search_value)
+            }
+        });
+
+        function callGetAllTrackingEntries(received_franchise_id, received_offset, received_search_value) {
+            console.log(`received : ${received_offset}`)
+            $.ajax({
+                type: "POST",
+                url: BASE_URL + GET_ALL_TRACKING_ENTRIES,
+                data: JSON.stringify({
+                    "franchise_id": received_franchise_id,
+                    "offset": received_offset,
+                    "search_value": received_search_value,
+                    "limit": 5
+                }, function (k, v) { return v === undefined ? null : v; }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                beforeSend: function () {
+                    $('#list_loading').show();
+                },
+                success: function (response) {
+                    $('#list_loading').hide();
+
+                    if (response != null && response['code'] == '000') {
+                        var response_rows = response['rows'];
+                        
+                        if (response_rows.length > 0) {
+                            for (index in response_rows) {
+                                let start_location_name = response_rows[index]['start_location_name']
+                                start_location_name = start_location_name.split(',')[0];
+
+                                let end_location_name = response_rows[index]['end_location_name']
+                                end_location_name = end_location_name.split(',')[0];
+
+                                let location_name = start_location_name + '&emsp; <i class="fa fa-arrow-circle-right" style="color:green"></i> &emsp;' + end_location_name
+
+                                let driver_details = response_rows[index]['name'] + " | " + response_rows[index]['mobile_number']
+
+                                createCard(location_name, driver_details, response_rows[index]['mobile_number'])
+                            }
+                        }
+                    } else {
+
+                    }
+                },
+                error: function (response) {
+                    $('#list_loading').hide();
+
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GETTING_TRACKING_LIST)
+                    }
+                }
+            });
+        }
+
+        function createCard(location_name, driver_details, mobile_number) {
+            const divCard = document.createElement('div');
+            divCard.className = 'card'
+            divCard.style = 'margin : 10px;'
+            divCard.innerHTML = `<div class="card-body">
+                <h6 class="card-title">${location_name}</h6>
+                <h6 class="card-subtitle mb-2 text-muted">${driver_details}</h6>
+                <a href="tracking_details.html?mobile_number=${mobile_number}" class="card-link">Track <i class="fa fa-location-arrow" style="color:#007BFF"></i></a>
+            </div>`
+
+            $('#tracking_list').append(divCard);
+        }
+
+        function reroute(mobile_number) {
+            window.location.href = `tracking-details.html?mobile_number=${mobile_number}`;
+        }
+    </script>
 </body>
 
 </html>

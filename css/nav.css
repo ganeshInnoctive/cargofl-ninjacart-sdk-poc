@@ -11,6 +11,7 @@ body {
     background-color: #ffffff;
     display: flex;
     overflow-x: auto;
+    margin-top: 20px;
 }
 
 .nav a {
