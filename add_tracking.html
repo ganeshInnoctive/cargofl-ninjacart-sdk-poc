@@ -54,7 +54,8 @@
                     <div class="col-12 col-lg-6">
                         <div class="row no-gutters">
                             <div class="col-12 col-lg-12">
-                                <button class="btn btn-primary" onclick="window.history.go(-1); return false;">Back</button>
+                                <button class="btn btn-primary"
+                                    onclick="window.history.go(-1); return false;">Back</button>
                                 <h1 class="tx-bold tx-center header-title">Create Trip</h1>
                             </div>
                             <div class="col-12 col-lg-12 my-2 my-lg-4 my-xl-5">
@@ -67,7 +68,9 @@
                                                         <div class="col-12 form-group">
                                                             <label class="tx-semibold">Driver Name*</label>
                                                             <select name="driver_name" id="driver_name"
-                                                                class="form-control"> </select>
+                                                                class="form-control">
+                                                                <option value=""></option>
+                                                            </select>
                                                         </div>
                                                         <div class="col-12 form-group">
                                                             <label class="tx-semibold">Mobile Number*</label>
@@ -81,42 +84,50 @@
                                                 </div>
                                             </div>
                                             <!-- Start Location -->
-                                            <div class="row">
-                                                <div class="col-12 form-group">
-                                                    <label class="tx-semibold">Start Location*</label>
+                                            <div id="startLocationDiv" hidden>
+                                                <div class="row">
+                                                    <div class="col-12 form-group">
+                                                        <label class="tx-semibold">Start Location*</label>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <input type="text" class="form-control" id="start_location_name"
+                                                            hidden>
+                                                        <input type="text" class="form-control" id="start_location_lat"
+                                                            hidden>
+                                                        <input type="text" class="form-control" id="start_location_long"
+                                                            hidden>
+                                                    </div>
                                                 </div>
-                                                <div class="col-md-3">
-                                                    <input type="text" class="form-control" id="start_location_name"
-                                                        hidden>
-                                                    <input type="text" class="form-control" id="start_location_lat"
-                                                        hidden>
-                                                    <input type="text" class="form-control" id="start_location_long"
-                                                        hidden>
-                                                </div>
+                                                <div id="startlocationPicker" style="width: auto; height: 300px;"></div>
                                             </div>
-                                            <div id="startlocationPicker" style="width: auto; height: 300px;"></div>
 
                                             <!-- End Location -->
                                             <br>
-                                            <div class="row">
-                                                <div class="col-12 form-group">
-                                                    <label class="tx-semibold">Destination Location*</label>
+                                            <div id="endLocationDiv" hidden>
+                                                <div class="row">
+                                                    <div class="col-12 form-group">
+                                                        <label class="tx-semibold">Destination Location*</label>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <input type="text" class="form-control" id="end_location_name"
+                                                            hidden>
+                                                        <input type="text" class="form-control" id="end_location_lat"
+                                                            hidden>
+                                                        <input type="text" class="form-control" id="end_location_long"
+                                                            hidden>
+                                                    </div>
                                                 </div>
-                                                <div class="col-md-3">
-                                                    <input type="text" class="form-control" id="end_location_name"
-                                                        hidden>
-                                                    <input type="text" class="form-control" id="end_location_lat"
-                                                        hidden>
-                                                    <input type="text" class="form-control" id="end_location_long"
-                                                        hidden>
-                                                </div>
+                                                <br>
+                                                <div id="endlocationPicker" style="width: auto; height: 300px;"></div>
                                             </div>
-                                            <br>
-                                            <div id="endlocationPicker" style="width: auto; height: 300px;"></div>
 
                                             <div class="col-12 col-lg-12 mt-4 text-center">
                                                 <button id="button_add_trip" type="button"
-                                                    class="btn btn-primary btn-sm ">Add Trip</button>
+                                                    class="btn btn-primary btn-sm " hidden>Add Trip</button>
+                                            </div>
+                                            <div class="col-12 col-lg-12 mt-4 text-center">
+                                                <button id="button_add_driver" type="button"
+                                                    class="btn btn-primary btn-sm " hidden>Add Driver</button>
                                             </div>
                                             <div class="col-12 col-lg-12 mt-4 text-center">
                                                 <button id="button_cancel" type="button" onclick=reroute()
@@ -157,17 +168,19 @@
                     showLoader()
                 },
                 success: function (response) {
+                    console.log(response)
                     hideLoader()
                     // This function transforms the response array into a select2 valid json obj
                     var data = $.map(response.data, function (obj) {
-                        obj.id = obj.id || obj.login_id;
-                        obj.text = obj.text || obj.name;
+                        obj.id = obj.id || obj.contactno;
+                        obj.text = obj.text || obj.name + " - " + obj.contactno;
                         return obj;
                     });
                     driverList = data;
                     // This is a hack. NOT GOOD.
                     $("#driver_name").select2({
                         minimumInputLength: 1,
+                        tags: true,
                         placeholder: "Enter a driver name",
                         allowClear: true,
                         data: driverList
@@ -278,6 +291,217 @@
                 latitudeId: "end_location_lat",
             });
         });
+
+        $('#driver_name').on('select2:select', function (e) {
+            // This checks if the selected Driver is new or existing
+            if ($('#driver_name :selected').val() == $('#driver_name :selected').text()) {
+                $("#button_add_driver").removeAttr("hidden");
+                // console.log('This is a new value')
+            }
+            else {
+                $("#startLocationDiv").removeAttr("hidden");
+                $("#endLocationDiv").removeAttr("hidden");
+                $("#button_add_trip").removeAttr("hidden");
+                $("#input_driver_mobile").val($('#driver_name :selected').val());
+            }
+        });
+
+        $("#button_add_driver").on('click', function (e) {
+            let driver_mobile_number = $('#input_driver_mobile').val()
+            let driver_name = $('#driver_name :selected').text()
+
+            if (driver_name == "" || driver_name == null) {
+                alert('Driver name is mandatory')
+            } else if (driver_name.length < 3) {
+                alert('Driver name should atleast be 3 char long')
+            } else if (driver_mobile_number == "" || driver_mobile_number == null) {
+                alert('Driver mobile number is mandatory')
+            } else if (driver_mobile_number.length != 10) {
+                alert('Driver mobile number should be 10 digit number')
+            } else {
+                e.preventDefault()
+                get_access_token(driver_name, driver_mobile_number)
+            }
+        });
+
+
+        function get_access_token(driver_name, driver_mobile_number) {
+            $.ajax({
+                type: "POST",
+                url: BASE_URL + ENDPOINT_GENERATE_AUTH_TOKEN,
+                data: JSON.stringify({
+                    "username": FLEETOS_USERNAME,
+                    "password": FLEETOS_PASSWORD
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                beforeSend: function () {
+                    showLoader()
+                },
+                success: function (response) {
+                    hideLoader()
+
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else if (response['auth_token'] == null || response['auth_token'] == "") {
+                        alert(ERROR_TOKEN_EMPTY)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            let token = response['auth_token']
+
+                            call_add_driver(driver_name, driver_mobile_number, token)
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_GENERATING_AUTH_TOKEN)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    hideLoader()
+
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GENERATING_AUTH_TOKEN)
+                    }
+                }
+            });
+        }
+
+        function call_add_driver(driver_name, driver_mobile_number, token) {
+            $.ajax({
+                type: "POST",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "bearer " + token);
+                    showLoader()
+                },
+                url: BASE_URL + ENDPOINT_ADD_DRIVER,
+                data: JSON.stringify({
+                    "driver_mobile_number": driver_mobile_number,
+                    "driver_name": driver_name,
+                    "franchise_id": "FOY0320"
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    hideLoader()
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            get_driver_details_from_fleetos(driver_mobile_number, token)
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_ADDING_DRIVER)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    hideLoader()
+
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_ADDING_DRIVER)
+                    }
+                }
+            });
+        }
+
+        function get_driver_details_from_fleetos(driver_mobile_number, token) {
+            $.ajax({
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "bearer " + token);
+                    showLoader();
+                },
+                url: BASE_URL + ENDPOINT_GET_USER_DETAILS_FROM_FLEETOS + driver_mobile_number,
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                success: function (response) {
+                    hideLoader()
+
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            driver_id = response['data']['driverId']
+
+                            if (driver_id != null || driver_id != "") {
+                                send_consent(driver_id, token)
+                            } else {
+                                alert(ERROR_GETTING_DRIVER_ID)
+                            }
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_GETTING_DRIVER_ID)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    hideLoader()
+
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GETTING_DRIVER_ID)
+                    }
+                }
+            });
+        }
+
+        function send_consent(driver_id, token) {
+            $.ajax({
+                type: "GET",
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "bearer " + token);
+                },
+                url: BASE_URL + ENDPOINT_SEND_CONSENT + driver_id,
+                data: {
+                    "user_id": driver_id
+                },
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    hideLoader()
+
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            alert("Driver added successfully!")
+                            $("#startLocationDiv").removeAttr("hidden");
+                            $("#endLocationDiv").removeAttr("hidden");
+                            $("#button_add_trip").removeAttr("hidden");
+                            $("#button_add_driver").hide();
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_SENDING_CONSENT_TO_DRIVER)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    hideLoader()
+
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_SENDING_CONSENT_TO_DRIVER)
+                    }
+                }
+            });
+        }
 
 
     </script>
