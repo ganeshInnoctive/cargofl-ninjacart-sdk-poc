@@ -161,6 +161,7 @@
                 type: "POST",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "bearer " + token);
+                    showLoader();
                 },
                 url: BASE_URL + ENDPOINT_ADD_DRIVER,
                 data: JSON.stringify({
@@ -170,9 +171,6 @@
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
-                beforeSend: function () {
-                    showLoader()
-                },
                 success: function (response) {
                     hideLoader()
                     if (response == null) {
@@ -206,13 +204,11 @@
                 type: "GET",
                 beforeSend: function (request) {
                     request.setRequestHeader("Authorization", "bearer " + token);
+                    showLoader();
                 },
                 url: BASE_URL + ENDPOINT_GET_USER_DETAILS_FROM_FLEETOS + driver_mobile_number,
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
-                beforeSend: function () {
-                    showLoader()
-                },
                 success: function (response) {
                     hideLoader()
 

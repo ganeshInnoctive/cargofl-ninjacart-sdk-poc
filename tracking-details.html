@@ -63,7 +63,8 @@
                     <div class="col-12 col-lg-10">
                         <div class="row no-gutters">
                             <div class="col-12 col-lg-12">
-                                <button class="btn btn-primary" onclick="window.history.go(-1); return false;">Back</button>
+                                <button class="btn btn-primary"
+                                    onclick="window.history.go(-1); return false;">Back</button>
                                 <h1 class="tx-bold tx-center header-title">SIM Tracking</h1>
                             </div>
                             <div class="col-12 col-lg-12 my-2 my-lg-4 my-xl-5">
@@ -117,7 +118,7 @@
             }
 
             if (mobileNumber != "" && mobileNumber != null) {
-                getTrackingDetails(mobileNumber, currentDateTimeInEpoch, twoDaysBeforeCurrentDateTimeInEpoch)
+                // getTrackingDetails(mobileNumber, currentDateTimeInEpoch, twoDaysBeforeCurrentDateTimeInEpoch)
             } else {
                 alert('Mobile number is mandatory for tracking user')
             }
@@ -141,6 +142,95 @@
                 }
             });
 
+            $.ajax({
+                type: "POST",
+                url: BASE_URL + ENDPOINT_GENERATE_AUTH_TOKEN,
+                data: JSON.stringify({
+                    "username": FLEETOS_USERNAME,
+                    "password": FLEETOS_PASSWORD
+                }),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                beforeSend: function () {
+                    showLoader()
+                },
+                success: function (response) {
+                    hideLoader()
+
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else if (response['auth_token'] == null || response['auth_token'] == "") {
+                        alert(ERROR_TOKEN_EMPTY)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            let token = response['auth_token']
+
+                            get_driver_details_from_fleetos(mobileNumber, token)
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_GENERATING_AUTH_TOKEN)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    hideLoader()
+
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GENERATING_AUTH_TOKEN)
+                    }
+                }
+            });
+
+            function get_driver_details_from_fleetos(driver_mobile_number, token) {
+                $.ajax({
+                    type: "GET",
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "bearer " + token);
+                        showLoader()
+                    },
+                    url: BASE_URL + ENDPOINT_GET_USER_DETAILS_FROM_FLEETOS + driver_mobile_number,
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (response) {
+                        hideLoader()
+
+                        if (response == null) {
+                            alert(ERROR_RESPONSE_NULL)
+                        } else {
+                            if (response['code'] == API_SUCCESS_CODE) {
+                                if (response['data']['simConsent'] == 'N') {
+                                    alert(response['data']['simConsentMsg'])
+                                }
+                                else {
+                                    getTrackingDetails(mobileNumber, currentDateTimeInEpoch, twoDaysBeforeCurrentDateTimeInEpoch, token)
+                                }
+                            } else {
+                                if (response['message'] != null && response['message'] != "") {
+                                    alert(response['message'])
+                                } else {
+                                    alert(ERROR_GETTING_DRIVER_ID)
+                                }
+                            }
+                        }
+                    },
+                    error: function (response) {
+                        hideLoader()
+
+                        if (response['message'] != null && response['message'] != "") {
+                            alert(response['message'])
+                        } else {
+                            alert(ERROR_GETTING_DRIVER_ID)
+                        }
+                    }
+                });
+            }
+
+
             $("#endDateTime").change(function (e) {
                 let startDateTime = $('#startDateTime').val();
                 let endDateTime = $('#endDateTime').val();
@@ -153,28 +243,73 @@
                     let startDateTimeInEpoch = convertDateTimeStringToEpoch(startDateTime)
                     let endDateTimeInEpoch = convertDateTimeStringToEpoch(endDateTime)
 
-                    getTrackingDetails(mobileNumber, startDateTimeInEpoch, endDateTimeInEpoch)
+                    getToken(mobileNumber, startDateTimeInEpoch, endDateTimeInEpoch)
                 }
             });
 
         });
 
-        function convertDateTimeStringToEpoch(dateTime) {
-            return moment(dateTime, "dd-mm-yyyy hh:ii").valueOf()
-        }
-
-        function getTrackingDetails(mobileNumber, startDateTime, stopDateTime) {
+        function getToken(mobileNumber, startDateTimeInEpoch, endDateTimeInEpoch) {
             $.ajax({
                 type: "POST",
-                url: "https://mt-test.cargofl.com/api/v1/sim_tracking/get-sim-tracking-location-details",
+                url: BASE_URL + ENDPOINT_GENERATE_AUTH_TOKEN,
                 data: JSON.stringify({
-                    "mobile_number": mobileNumber,
-                    "startTime": startDateTime,
-                    "stopTime": stopDateTime
+                    "username": FLEETOS_USERNAME,
+                    "password": FLEETOS_PASSWORD
                 }),
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 beforeSend: function () {
+                    showLoader()
+                },
+                success: function (response) {
+                    hideLoader()
+
+                    if (response == null) {
+                        alert(ERROR_RESPONSE_NULL)
+                    } else if (response['auth_token'] == null || response['auth_token'] == "") {
+                        alert(ERROR_TOKEN_EMPTY)
+                    } else {
+                        if (response['code'] == API_SUCCESS_CODE) {
+                            let token = response['auth_token']
+
+                            getTrackingDetails(mobileNumber, startDateTimeInEpoch, endDateTimeInEpoch, token)
+                        } else {
+                            if (response['message'] != null && response['message'] != "") {
+                                alert(response['message'])
+                            } else {
+                                alert(ERROR_GENERATING_AUTH_TOKEN)
+                            }
+                        }
+                    }
+                },
+                error: function (response) {
+                    hideLoader()
+
+                    if (response['message'] != null && response['message'] != "") {
+                        alert(response['message'])
+                    } else {
+                        alert(ERROR_GENERATING_AUTH_TOKEN)
+                    }
+                }
+            });
+        }
+
+        function convertDateTimeStringToEpoch(dateTime) {
+            return moment(dateTime, "dd-mm-yyyy hh:ii").valueOf()
+        }
+
+        function getTrackingDetails(mobileNumber, startDateTime, stopDateTime, token) {
+            $.ajax({
+                type: "GET",
+                url: BASE_URL + GET_USER_LOCATION_HISTORY,
+                data: {
+                    "mobile_number": mobileNumber,
+                    "start_time": startDateTime,
+                    "stop_time": stopDateTime
+                },
+                beforeSend: function (request) {
+                    request.setRequestHeader("Authorization", "bearer " + token);
                     showLoader()
                 },
                 success: function (response) {
@@ -189,9 +324,10 @@
                     }
                 },
                 error: function (response) {
+                    console.log(response['responseJSON']['message'])
                     hideLoader()
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                        alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GETTING_TRACKING_DETAILS)
                     }

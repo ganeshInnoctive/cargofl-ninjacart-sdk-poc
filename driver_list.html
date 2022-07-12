@@ -60,7 +60,7 @@
                                                 <tr>
                                                     <th data-field="name">Name</th>
                                                     <th data-field="mobile_number">Number</th>
-                                                    <th data-field="sim_consent_status">Consent</th>
+                                                     <th data-field="sim_consent_status">Consent</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -110,6 +110,13 @@
             console.log("This works!")
             window.location.href = 'tracking-details.html';
         }
+
+        window.addEventListener('scroll', () => {
+            const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
+            if (scrollTop + clientHeight > scrollHeight - 5) {
+                console.log("Max scroll!")
+            }
+        });
     </script>
 
     <nav class="nav">
