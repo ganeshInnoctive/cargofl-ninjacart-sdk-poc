@@ -97,8 +97,8 @@
                 },
                 error: function (response) {
                     hideLoader()
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                         alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GENERATING_AUTH_TOKEN)
                     }
@@ -107,14 +107,12 @@
         }
 
         function reroute() {
-            console.log("This works!")
             window.location.href = 'tracking-details.html';
         }
 
         window.addEventListener('scroll', () => {
             const { scrollHeight, scrollTop, clientHeight } = document.documentElement;
             if (scrollTop + clientHeight > scrollHeight - 5) {
-                console.log("Max scroll!")
             }
         });
     </script>

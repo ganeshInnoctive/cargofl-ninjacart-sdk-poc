@@ -47,6 +47,145 @@
         <img src="images/loader.gif" />
     </div>
 
+    <!-- This section serves the purpose of cloning DOM elements into Google Maps Div -->
+    <div style="display: none;">
+        <div class="checkpoint panel panel-default" hidden>
+            <form class="checkpoint_form" hidden>
+                <input type="text" name="latitude">
+                <input type="text" name="longitude">
+                <input type="text" name="route_checkpoint_name">
+                <input type="text" name="sequence_number">
+                <input type="text" name="offset_in_millis">
+            </form>
+            <img src="images/gmap.png" width="18" height="18" />
+            <span class="panel-title"></span>
+            <div class="pull-right">
+                <button type="button" class="btn btn-sm btn-success add_expense_btn">
+                    <i class="fa fa-plus"></i> Add Expense
+                </button>
+                <button type="button" class="btn btn-sm btn-danger remove_checkpoint">
+                    <i class="fa fa-minus"></i>
+                </button>
+            </div>
+            <div class="expenses"></div>
+        </div>
+
+        <div id="pac-card-0">
+            <div class="input-group">
+                <input id="pac-input-0" type="text" class="form-control" placeholder="Search Google Maps" />
+            </div>
+        </div>
+
+        <div id="infowindow-content-0" class="poi-info-window gm-style">
+            <form>
+                <input type="text" name="checkpoint_name" hidden>
+                <input type="text" name="latitude" hidden>
+                <input type="text" name="longitude" hidden>
+            </form>
+            <div class="title full-width"></div>
+            <div class="address">
+                <div class="address-line full-width"></div>
+            </div>
+            <br />
+        </div>
+
+        <div class="expense_chip" hidden>
+            <span class="expense_type"></span> : <i class="fa fa-inr"></i> <span class="expense_amount"></span>/- ,
+            Quantity : <span class="diesel_quantity"></span>
+            <span class="remove_expense_chip">×</span>
+            <form>
+                <input type="text" name="expense_type" hidden>
+                <input type="text" name="expense_amount" hidden>
+                <input type="text" name="diesel_quantity" hidden>
+            </form>
+        </div>
+
+        <div class="expense_total col-md-4" hidden>
+            <div class="panel panel-info">
+                <div class="panel-heading"></div>
+                <div class="panel-body">
+                    <i class="fa fa-inr"></i> <span class="expense_amount"></span>/-
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group" id="existing_checkpoints" style="margin: 10px; max-width: 330px;" hidden>
+            <select name="checkpoint" class="form-control">
+                <option value="">Select Existing Checkpoint</option>
+            </select>
+        </div>
+
+    </div>
+
+    <div style="display: none;">
+        <div class="checkpoint panel panel-default" hidden>
+            <form class="checkpoint_form" hidden>
+                <input type="text" name="latitude">
+                <input type="text" name="longitude">
+                <input type="text" name="route_checkpoint_name">
+                <input type="text" name="sequence_number">
+                <input type="text" name="offset_in_millis">
+            </form>
+            <img src="images/gmap.png" width="18" height="18" />
+            <span class="panel-title"></span>
+            <div class="pull-right">
+                <button type="button" class="btn btn-sm btn-success add_expense_btn">
+                    <i class="fa fa-plus"></i> Add Expense
+                </button>
+                <button type="button" class="btn btn-sm btn-danger remove_checkpoint">
+                    <i class="fa fa-minus"></i>
+                </button>
+            </div>
+            <div class="expenses"></div>
+        </div>
+
+        <div id="pac-card-1">
+            <div class="input-group">
+                <input id="pac-input-1" type="text" class="form-control" placeholder="Search Google Maps" />
+            </div>
+        </div>
+
+        <div id="infowindow-content-1" class="poi-info-window gm-style">
+            <form>
+                <input type="text" name="checkpoint_name" hidden>
+                <input type="text" name="latitude" hidden>
+                <input type="text" name="longitude" hidden>
+            </form>
+            <div class="title full-width"></div>
+            <div class="address">
+                <div class="address-line full-width"></div>
+            </div>
+            <br />
+        </div>
+
+        <div class="expense_chip" hidden>
+            <span class="expense_type"></span> : <i class="fa fa-inr"></i> <span class="expense_amount"></span>/- ,
+            Quantity : <span class="diesel_quantity"></span>
+            <span class="remove_expense_chip">×</span>
+            <form>
+                <input type="text" name="expense_type" hidden>
+                <input type="text" name="expense_amount" hidden>
+                <input type="text" name="diesel_quantity" hidden>
+            </form>
+        </div>
+
+        <div class="expense_total col-md-4" hidden>
+            <div class="panel panel-info">
+                <div class="panel-heading"></div>
+                <div class="panel-body">
+                    <i class="fa fa-inr"></i> <span class="expense_amount"></span>/-
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group" id="existing_checkpoints" style="margin: 10px; max-width: 330px;" hidden>
+            <select name="checkpoint" class="form-control">
+                <option value="">Select Existing Checkpoint</option>
+            </select>
+        </div>
+
+    </div>
+
     <main class="main-container">
         <section class="p-2 p-md-3 p-lg-5">
             <div class="container">
@@ -98,7 +237,7 @@
                                                             hidden>
                                                     </div>
                                                 </div>
-                                                <div id="startlocationPicker" style="width: auto; height: 300px;"></div>
+                                                <div id="start_map" style="width: auto; height: 300px;"></div>
                                             </div>
 
                                             <!-- End Location -->
@@ -118,7 +257,7 @@
                                                     </div>
                                                 </div>
                                                 <br>
-                                                <div id="endlocationPicker" style="width: auto; height: 300px;"></div>
+                                                <div id="end_map" style="width: auto; height: 300px;"></div>
                                             </div>
 
                                             <div class="col-12 col-lg-12 mt-4 text-center">
@@ -168,7 +307,6 @@
                     showLoader()
                 },
                 success: function (response) {
-                    console.log(response)
                     hideLoader()
                     // This function transforms the response array into a select2 valid json obj
                     var data = $.map(response.data, function (obj) {
@@ -188,8 +326,8 @@
                 },
                 error: function (response) {
                     hideLoader()
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                        alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GETTING_DRIVER_LIST)
                     }
@@ -256,8 +394,8 @@
                         alert(SUCCESS_CREATE_TRIP)
                         reroute()
                     } else {
-                        if (response['message'] != null && response['message'] != "") {
-                            alert(response['message'])
+                        if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                            alert(response['responseJSON']['message'])
                         } else {
                             alert(ERROR_ADDING_TRIP_LIST)
                         }
@@ -266,8 +404,8 @@
                 },
                 error: function (response) {
                     hideLoader()
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                        alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GENERATING_AUTH_TOKEN)
                     }
@@ -279,24 +417,23 @@
             window.location.href = 'tracking_list.html';
         }
 
-        $(document).ready(function () {
-            OSMPICKER.initmappicker('startlocationPicker', 18.5204, 73.8567, 300, {
-                addressId: "start_location_name",
-                longitudeId: "start_location_long",
-                latitudeId: "start_location_lat",
-            });
-            OSMPICKEREND.initmappicker('endlocationPicker', 18.5204, 73.8567, 300, {
-                addressId: "end_location_name",
-                longitudeId: "end_location_long",
-                latitudeId: "end_location_lat",
-            });
-        });
+        // $(document).ready(function () {
+        //     OSMPICKER.initmappicker('startlocationPicker', 18.5204, 73.8567, 300, {
+        //         addressId: "start_location_name",
+        //         longitudeId: "start_location_long",
+        //         latitudeId: "start_location_lat",
+        //     });
+        //     OSMPICKEREND.initmappicker('endlocationPicker', 18.5204, 73.8567, 300, {
+        //         addressId: "end_location_name",
+        //         longitudeId: "end_location_long",
+        //         latitudeId: "end_location_lat",
+        //     });
+        // });
 
         $('#driver_name').on('select2:select', function (e) {
             // This checks if the selected Driver is new or existing
             if ($('#driver_name :selected').val() == $('#driver_name :selected').text()) {
                 $("#button_add_driver").removeAttr("hidden");
-                // console.log('This is a new value')
             }
             else {
                 $("#startLocationDiv").removeAttr("hidden");
@@ -351,8 +488,8 @@
 
                             call_add_driver(driver_name, driver_mobile_number, token)
                         } else {
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
+                            if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                alert(response['responseJSON']['message'])
                             } else {
                                 alert(ERROR_GENERATING_AUTH_TOKEN)
                             }
@@ -362,8 +499,8 @@
                 error: function (response) {
                     hideLoader()
 
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                        alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GENERATING_AUTH_TOKEN)
                     }
@@ -394,8 +531,8 @@
                         if (response['code'] == API_SUCCESS_CODE) {
                             get_driver_details_from_fleetos(driver_mobile_number, token)
                         } else {
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
+                            if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                alert(response['responseJSON']['message'])
                             } else {
                                 alert(ERROR_ADDING_DRIVER)
                             }
@@ -404,9 +541,8 @@
                 },
                 error: function (response) {
                     hideLoader()
-
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                        alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_ADDING_DRIVER)
                     }
@@ -439,8 +575,8 @@
                                 alert(ERROR_GETTING_DRIVER_ID)
                             }
                         } else {
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
+                            if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                alert(response['responseJSON']['message'])
                             } else {
                                 alert(ERROR_GETTING_DRIVER_ID)
                             }
@@ -450,8 +586,8 @@
                 error: function (response) {
                     hideLoader()
 
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                        alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GETTING_DRIVER_ID)
                     }
@@ -483,8 +619,8 @@
                             $("#button_add_trip").removeAttr("hidden");
                             $("#button_add_driver").hide();
                         } else {
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
+                            if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                alert(response['responseJSON']['message'])
                             } else {
                                 alert(ERROR_SENDING_CONSENT_TO_DRIVER)
                             }
@@ -494,17 +630,21 @@
                 error: function (response) {
                     hideLoader()
 
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                        alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_SENDING_CONSENT_TO_DRIVER)
                     }
                 }
             });
         }
-
-
     </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL7VxK8eW8-f2w_bzSeynTSPX941Msx9c&libraries=places&callback=initMap"
+        type="text/javascript">
+        </script>
+    <script src="js/add_tracking.js"></script>
+
 </body>
 
 </html>

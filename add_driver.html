@@ -136,8 +136,8 @@
 
                             call_add_driver(driver_name, driver_mobile_number, token)
                         } else {
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
+                            if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                 alert(response['responseJSON']['message'])
                             } else {
                                 alert(ERROR_GENERATING_AUTH_TOKEN)
                             }
@@ -147,8 +147,8 @@
                 error: function (response) {
                     hideLoader()
 
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                         alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GENERATING_AUTH_TOKEN)
                     }
@@ -179,8 +179,8 @@
                         if (response['code'] == API_SUCCESS_CODE) {
                             get_driver_details_from_fleetos(driver_mobile_number, token)
                         } else {
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
+                            if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                 alert(response['responseJSON']['message'])
                             } else {
                                 alert(ERROR_ADDING_DRIVER)
                             }
@@ -190,8 +190,8 @@
                 error: function (response) {
                     hideLoader()
 
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                         alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_ADDING_DRIVER)
                     }
@@ -224,8 +224,8 @@
                                 alert(ERROR_GETTING_DRIVER_ID)
                             }
                         } else {
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
+                            if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                 alert(response['responseJSON']['message'])
                             } else {
                                 alert(ERROR_GETTING_DRIVER_ID)
                             }
@@ -235,8 +235,8 @@
                 error: function (response) {
                     hideLoader()
 
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                         alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GETTING_DRIVER_ID)
                     }
@@ -265,8 +265,8 @@
                             window.location.href = 'driver_list.html';
                             alert("Driver added succssfully!")
                         } else {
-                            if (response['message'] != null && response['message'] != "") {
-                                alert(response['message'])
+                            if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                 alert(response['responseJSON']['message'])
                             } else {
                                 alert(ERROR_SENDING_CONSENT_TO_DRIVER)
                             }
@@ -276,8 +276,8 @@
                 error: function (response) {
                     hideLoader()
 
-                    if (response['message'] != null && response['message'] != "") {
-                        alert(response['message'])
+                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                         alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_SENDING_CONSENT_TO_DRIVER)
                     }

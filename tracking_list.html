@@ -186,6 +186,7 @@
             offset = 0;
             search_value = ""
             callGetAllTrackingEntries(franchise_id, offset, search_value)
+            window.location.reload();
         } else {
             $('#tracking_list').empty()
             offset = 0;
@@ -194,7 +195,6 @@
     });
 
     function callGetAllTrackingEntries(received_franchise_id, received_offset, received_search_value) {
-        console.log(`received : ${received_offset}`)
         $.ajax({
             type: "POST",
             url: BASE_URL + GET_ALL_TRACKING_ENTRIES,
@@ -237,8 +237,8 @@
             error: function (response) {
                 $('#list_loading').hide();
 
-                if (response['message'] != null && response['message'] != "") {
-                    alert(response['message'])
+                if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                     alert(response['responseJSON']['message'])
                 } else {
                     alert(ERROR_GETTING_TRACKING_LIST)
                 }
