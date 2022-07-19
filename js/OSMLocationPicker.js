@@ -11,7 +11,7 @@ var OSMPICKER = (function () {
 		} catch (e) {
 			console.log(e);
 		}
-		var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+		var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png';
 		var osmAttrib = 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
 		var osm = new L.TileLayer(osmUrl, { minZoom: 1, maxZoom: 20, attribution: osmAttrib });
 		map.setView([lat, lon], 10);
