@@ -130,41 +130,14 @@
 
 <script>
     // TODO : Hardcoded franchise id to be replaced by the franchise id passed through ninjacart app
-    let franchise_id = 'FOY0320';
+    //let franchise_id = 'FOY0320';
 
     var offset = 0;
     var search_value = ""
 
     $(document).ready(function () {
-        callGetAllTrackingEntries(franchise_id, offset, search_value)
+        callGetAllTrackingEntries(FRANCHISE_ID, offset, search_value)
         var win = $(window);
-
-        // Each time the user scrolls
-        /*win.scroll(function (e) {
-            // End of the document reached?
-            if ($(document).height() - win.height() == win.scrollTop()) {
-                e.preventDefault();
-
-                offset = offset + 5
-                callGetAllTrackingEntries(franchise_id, offset, search_value)
-            }
-        });*/
-
-        /*window.addEventListener('scroll', (e) => {
-            if (window.scrollY + window.innerHeight >= document.body.offsetHeight - 1000) {
-                e.preventDefault();
-
-                offset = offset + 5
-                callGetAllTrackingEntries(franchise_id, offset, search_value)
-            }
-        });*/
-
-        /*window.onscroll = function (ev) {
-            if ((window.innerHeight + window.scrollY) >= document.body.scrollHeight) {
-                offset = offset + 5
-                callGetAllTrackingEntries(franchise_id, offset, search_value)
-            }
-        }*/
 
         let scrollY = window.scrollY;
         let innerHeight = window.innerHeight;
@@ -172,7 +145,7 @@
 
         if (scrollY + innerHeight > offsetHeight - 100) {
             offset = offset + 5
-            callGetAllTrackingEntries(franchise_id, offset, search_value)
+            callGetAllTrackingEntries(FRANCHISE_ID, offset, search_value)
         }
     });
 
@@ -185,12 +158,12 @@
             $('#tracking_list').empty()
             offset = 0;
             search_value = ""
-            callGetAllTrackingEntries(franchise_id, offset, search_value)
+            callGetAllTrackingEntries(FRANCHISE_ID, offset, search_value)
             window.location.reload();
         } else {
             $('#tracking_list').empty()
             offset = 0;
-            callGetAllTrackingEntries(franchise_id, offset, search_value)
+            callGetAllTrackingEntries(FRANCHISE_ID, offset, search_value)
         }
     });
 
