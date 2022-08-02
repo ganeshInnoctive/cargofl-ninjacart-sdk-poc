@@ -259,6 +259,21 @@
                                                 <br>
                                                 <div id="end_map" style="width: auto; height: 300px;"></div>
                                             </div>
+                                            <br /><br />
+                                            <div class="row no-gutters" id="optionalFieldDiv" hidden>
+                                                <div class="col-12 form-group">
+                                                    <label class="tx-semibold">Consignment Number</label>
+                                                    <input id="input_consignment_number" class="form-control"
+                                                        placeholder="Enter Consignment Number" required>
+                                                </div>
+
+                                                <div class="col-12 form-group">
+                                                    <label class="tx-semibold">Vehicle Number</label>
+                                                    <input id="input_vehicle_number" class="form-control"
+                                                        placeholder="Enter Vehicle Number"
+                                                        onkeyup="this.value = this.value.toUpperCase();" required>
+                                                </div>
+                                            </div>
 
                                             <div class="col-12 col-lg-12 mt-4 text-center">
                                                 <button id="button_add_trip" type="button"
@@ -355,6 +370,8 @@
             let end_latitude = $('#end_location_lat').val()
             let end_longitude = $('#end_location_long').val()
             let end_location_name = $('#end_location_name').val()
+            let consignment_number = $('#input_consignment_number').val();
+            let vehicle_number = $('#input_vehicle_number').val();
 
             if (driver_mobile_number == "" || driver_mobile_number == null) {
                 alert('Driver mobile number is mandatory')
@@ -362,12 +379,12 @@
                 alert('Driver mobile number should be 10 digit number')
             } else {
                 e.preventDefault()
-                addTrip(driver_mobile_number, driver_name, start_latitude, start_longitude, start_location_name, end_latitude, end_longitude, end_location_name)
+                addTrip(driver_mobile_number, driver_name, start_latitude, start_longitude, start_location_name, end_latitude, end_longitude, end_location_name, consignment_number, vehicle_number)
             }
         });
 
 
-        function addTrip(driver_mobile_number, driver_name, start_latitude, start_longitude, start_location_name, end_latitude, end_longitude, end_location_name) {
+        function addTrip(driver_mobile_number, driver_name, start_latitude, start_longitude, start_location_name, end_latitude, end_longitude, end_location_name, consignment_number, vehicle_number) {
             $.ajax({
                 type: "POST",
                 url: BASE_URL + ADD_TRACKING_ENTRY,
@@ -380,6 +397,8 @@
                     "end_latitude": end_latitude,
                     "end_longitude": end_longitude,
                     "end_location_name": end_location_name,
+                    "consignment_number": consignment_number,
+                    "vehicle_number": vehicle_number,
                     "modified_by": "LTH4198",
                     "franchise_id": FRANCHISE_ID
                 }),
@@ -438,6 +457,7 @@
             else {
                 $("#startLocationDiv").removeAttr("hidden");
                 $("#endLocationDiv").removeAttr("hidden");
+                $("#optionalFieldDiv").removeAttr("hidden");
                 $("#button_add_trip").removeAttr("hidden");
                 $("#input_driver_mobile").val($('#driver_name :selected').val());
             }
