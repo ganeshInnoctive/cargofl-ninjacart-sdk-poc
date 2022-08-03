@@ -8,3 +8,5 @@ ERROR_GETTING_DRIVER_LIST = "An error occurred while trying to fetch driver list
 ERROR_GETTING_TRACKING_LIST = "An error occurred while trying to fetch tracking list"
 ERROR_GETTING_TRACKING_DETAILS = "An error occurred while trying to fetch tracking details"
 ERROR_ADDING_TRIP_LIST = "An error occurred while trying create new trip"
+ERROR_STARTING_TRACKING = "An error occurred while starting user tracking"
+ERROR_STOPPING_TRACKING = "An error occurred while stopping user tracking"

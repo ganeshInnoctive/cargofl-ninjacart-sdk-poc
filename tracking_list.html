@@ -170,7 +170,7 @@
     function callGetAllTrackingEntries(received_franchise_id, received_offset, received_search_value) {
         $.ajax({
             type: "POST",
-            url: BASE_URL + GET_ALL_TRACKING_ENTRIES,
+            url: BASE_URL + ENDPOINT_GET_ALL_TRACKING_ENTRIES,
             data: JSON.stringify({
                 "franchise_id": received_franchise_id,
                 "offset": received_offset,
@@ -200,7 +200,13 @@
 
                             let driver_details = response_rows[index]['name'] + " | " + response_rows[index]['mobile_number']
 
-                            createCard(location_name, driver_details, response_rows[index]['mobile_number'])
+                            let consignment_number = response_rows[index]['consignment_number']
+                            let vehicle_number = response_rows[index]['vehicle_number']
+
+                            let end_location_lat = response_rows[index]['end_latitude'];
+                            let end_location_long = response_rows[index]['end_longitude'];
+
+                            createCard(location_name, driver_details, response_rows[index]['mobile_number'], consignment_number, vehicle_number, end_location_lat, end_location_long)
                         }
                     }
                 } else {
@@ -219,14 +225,25 @@
         });
     }
 
-    function createCard(location_name, driver_details, mobile_number) {
+    function createCard(location_name, driver_details, mobile_number, consignment_number, vehicle_number, end_location_lat, end_location_long) {
+        console.log(`end_location_lat : ${end_location_lat}, end_location_long : ${end_location_long}`);
+
         const divCard = document.createElement('div');
         divCard.className = 'card'
         divCard.style = 'margin : 10px;'
-        divCard.innerHTML = `<div class="card-body">
+        if(consignment_number == null || consignment_number == ""){
+            consignment_number = "NA"
+        }
+        if(vehicle_number == null || vehicle_number == ""){
+            vehicle_number = "NA"
+        }
+
+        divCard.innerHTML = `<div class="card-body" id >
             <h6 class="card-title">${location_name}</h6>
             <h6 class="card-subtitle mb-2 text-muted">${driver_details}</h6>
-            <a href="tracking_details.html?mobile_number=${mobile_number}" class="card-link">Track <i class="fa fa-location-arrow" style="color:#007BFF"></i></a>
+            <h6 class="card-text mb-2 text-muted">Consignment Number : ${consignment_number}</h6>
+            <h6 class="card-text mb-2 text-muted">Vehicle Number : ${vehicle_number}</h6>
+            <a href="tracking_details.html?mobile_number=${mobile_number}&end_location_lat=${end_location_lat}&end_location_long=${end_location_long}" class="card-link">Track <i class="fa fa-location-arrow" style="color:#007BFF"></i></a>
         </div>`
 
         $('#tracking_list').append(divCard);

@@ -80,7 +80,7 @@
         function ajaxRequest(params) {
             $.ajax({
                 type: "POST",
-                url: BASE_URL + GET_ALL_DRIVERS,
+                url: BASE_URL + ENDPOINT_GET_ALL_DRIVERS,
                 data: JSON.stringify({
                     "franchise_id": FRANCHISE_ID,
                     "offset": 1,

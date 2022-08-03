@@ -96,6 +96,8 @@
     <script src="js/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js"></script>
 
     <script>
+        var mobileNumber = "", token = "";
+
         $(document).ready(function (e) {
             // Set DateTimePicker
             $('.date-time-picker').datetimepicker({
@@ -107,17 +109,23 @@
             let currentDateTimeInEpoch = moment().valueOf()
             let twoDaysBeforeCurrentDateTimeInEpoch = moment().subtract(2, 'days').valueOf()
 
-            var mobileNumber = ""
+            var end_location_lat = "", end_location_long = "";
 
             let urlParams = new URLSearchParams(window.location.search)
             if (urlParams.has('mobile_number')) {
                 mobileNumber = urlParams.get('mobile_number')
             }
+            if (urlParams.has('end_location_lat')) {
+                endLocationLat = urlParams.get('end_location_lat')
+            }
+            if (urlParams.has('end_location_long')) {
+                endLocationLong = urlParams.get('end_location_long')
+            }
 
-            if (mobileNumber != "" && mobileNumber != null) {
-                // getTrackingDetails(mobileNumber, currentDateTimeInEpoch, twoDaysBeforeCurrentDateTimeInEpoch)
-            } else {
+            if (mobileNumber == "" || mobileNumber == null) {
                 alert('Mobile number is mandatory for tracking user')
+            } else if (endLocationLat == "" || endLocationLat == null || endLocationLong == "" || endLocationLong == null) {
+                alert('End location is mandatory for stopping tracking for a user')
             }
 
             var startDateTime = ""
@@ -160,7 +168,7 @@
                         alert(ERROR_TOKEN_EMPTY)
                     } else {
                         if (response['code'] == API_SUCCESS_CODE) {
-                            let token = response['auth_token']
+                            token = response['auth_token']
 
                             get_driver_details_from_fleetos(mobileNumber, token)
                         } else {
@@ -175,7 +183,7 @@
                 error: function (response) {
                     hideLoader()
 
-                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                    if (response != null && response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
                         alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GENERATING_AUTH_TOKEN)
@@ -269,9 +277,13 @@
                         alert(ERROR_TOKEN_EMPTY)
                     } else {
                         if (response['code'] == API_SUCCESS_CODE) {
-                            let token = response['auth_token']
+                            token = response['auth_token']
 
-                            getTrackingDetails(mobileNumber, startDateTimeInEpoch, endDateTimeInEpoch, token)
+                            if (mobileNumber != null && mobileNumber != "" && startDateTimeInEpoch != null && endDateTimeInEpoch != null) {
+                                getTrackingDetails(mobileNumber, startDateTimeInEpoch, endDateTimeInEpoch, token);
+                            } else {
+                                stopTracking();
+                            }
                         } else {
                             if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
                                 alert(response['responseJSON']['message'])
@@ -284,7 +296,7 @@
                 error: function (response) {
                     hideLoader()
 
-                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                    if (response != null && ['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
                         alert(response['responseJSON']['message'])
                     } else {
                         alert(ERROR_GENERATING_AUTH_TOKEN)
@@ -303,7 +315,7 @@
         function getTrackingDetails(mobileNumber, startDateTime, stopDateTime, token) {
             $.ajax({
                 type: "GET",
-                url: BASE_URL + GET_USER_LOCATION_HISTORY,
+                url: BASE_URL + ENDPOINT_GET_USER_LOCATION_HISTORY,
                 data: {
                     "mobile_number": mobileNumber,
                     "start_time": startDateTime,
@@ -337,7 +349,7 @@
         function view_map_view(gps_data) {
             let markers = [];
             let flightPlanCoordinates = [];
-
+            let bounds = new google.maps.LatLngBounds();
 
             Lat = 18.5204;
             Lon = 73.8567;
@@ -368,6 +380,11 @@
                 fullscreenControl: false
             });
 
+            //var firstLatLng  = { lat: parseFloat(pinged_locations[0]['lat']), lng: parseFloat(pinged_locations[0]['lng']) };
+            /*const center = new google.maps.LatLng(parseFloat(pinged_locations[0]['lat']), pinged_locations[0]['lng']);
+            window.map.panTo(center);
+            window.map.setZoom(4);*/
+
             for (i = 0; i < pinged_locations.length; i++) {
                 const myLatLng = { lat: parseFloat(pinged_locations[i]['lat']), lng: parseFloat((pinged_locations[i]['lng'])) };
                 // If first location, then set colour as green
@@ -394,6 +411,8 @@
                     markers.push(
                         marker
                     );
+                    // Add latlng to bound for fitting the map within bounds
+                    bounds.extend(myLatLng);
                 }
                 // If last location, then set colour as red
                 else if (i == pinged_locations.length - 1) {
@@ -420,6 +439,20 @@
                     markers.push(
                         marker
                     );
+                    // Add latlng to bound for fitting the map within bounds
+                    bounds.extend(myLatLng);
+
+                    // Create start latlng with last fetched location
+                    startLatLng = new google.maps.LatLng(parseFloat(pinged_locations[i]['lat']), parseFloat(pinged_locations[i]['lng']));
+                    // Create end latlng with actual destination lat and long
+                    endLatLng = new google.maps.LatLng(parseFloat(endLocationLat), parseFloat(endLocationLong));
+                    // Calculate distance between the last fetched location & actual destination
+                    let distance = getDistanceInMeters(myLatLng, endLatLng);
+
+                    // If distance is less than the defined distance to stop tracking, stop the tracking
+                    if (distance <= DISTANCE_TO_STOP_TRACKING) {
+                        stopTracking();
+                    }
                 }
                 // Set colour as blue for remaining markers
                 else {
@@ -446,8 +479,12 @@
                     markers.push(
                         marker
                     );
+                    // Add latlng to bound for fitting the map within bounds
+                    bounds.extend(myLatLng);
                 }
             }
+
+            map.fitBounds(bounds);
 
             // Connecting the dots
             var flightPath = new google.maps.Polyline({
@@ -460,11 +497,60 @@
             // Adding it to the map
             flightPath.setMap(map);
         }
+
+        function getDistanceInMeters(location1, location2) {
+            var distance = (google.maps.geometry.spherical.computeDistanceBetween(location1, location2) / 1000).toFixed(2);
+            return distance;
+        }
+
+        function stopTracking() {
+            // Generate a new token if token is empty
+            if (token == null || token == "") {
+                getToken(null, null, null);
+            } else {
+                $.ajax({
+                    type: "GET",
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "bearer " + token);
+                        showLoader();
+                    },
+                    url: BASE_URL + ENDPOINT_STOP_USER_TRACKING + mobileNumber,
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (response) {
+                        hideLoader();
+
+                        if (response == null) {
+                            alert(ERROR_RESPONSE_NULL)
+                        } else {
+                            if (response['code'] == API_SUCCESS_CODE) {
+                                alert(SUCCESS_STOPPING_TRACKING);
+                            } else {
+                                if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                    alert(response['responseJSON']['message'])
+                                } else {
+                                    alert(ERROR_STOPPING_TRACKING)
+                                }
+                            }
+                        }
+                    },
+                    error: function (response) {
+                        hideLoader()
+
+                        if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                            alert(response['responseJSON']['message'])
+                        } else {
+                            alert(ERROR_STOPPING_TRACKING)
+                        }
+                    }
+                });
+            }
+        }
     </script>
 </body>
 
 <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL7VxK8eW8-f2w_bzSeynTSPX941Msx9c&libraries=places&callback=initMap"
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL7VxK8eW8-f2w_bzSeynTSPX941Msx9c&libraries=places&callback=view_map_view"
     type="text/javascript">
     </script>
 

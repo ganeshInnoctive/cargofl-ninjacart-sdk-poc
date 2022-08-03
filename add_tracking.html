@@ -308,10 +308,11 @@
 
     <script>
         let driverList = [];
+        var token = "", driver_mobile_number = "", driver_name = "";
 
         $(document).ready(function () {
             $.ajax({
-                url: BASE_URL + GET_DRIVERS_SELECT,
+                url: BASE_URL + ENDPOINT_GET_DRIVERS_SELECT,
                 type: "POST",
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8',
@@ -362,8 +363,8 @@
         }
 
         $("#button_add_trip").on('click', function (e) {
-            let driver_mobile_number = $('#input_driver_mobile').val()
-            let driver_name = $('#driver_name :selected').text()
+            driver_mobile_number = $('#input_driver_mobile').val()
+            driver_name = $('#driver_name :selected').text()
             let start_latitude = $('#start_location_lat').val()
             let start_longitude = $('#start_location_long').val()
             let start_location_name = $("#start_location_name").val()
@@ -387,7 +388,7 @@
         function addTrip(driver_mobile_number, driver_name, start_latitude, start_longitude, start_location_name, end_latitude, end_longitude, end_location_name, consignment_number, vehicle_number) {
             $.ajax({
                 type: "POST",
-                url: BASE_URL + ADD_TRACKING_ENTRY,
+                url: BASE_URL + ENDPOINT_ADD_TRACKING_ENTRY,
                 data: JSON.stringify({
                     "mobile_number": driver_mobile_number,
                     "driver_name": driver_name,
@@ -410,8 +411,7 @@
                 success: function (response) {
                     hideLoader()
                     if (response['code'] == API_SUCCESS_CODE) {
-                        alert(SUCCESS_CREATE_TRIP)
-                        reroute()
+                        startTracking();
                     } else {
                         if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
                             alert(response['responseJSON']['message'])
@@ -464,8 +464,8 @@
         });
 
         $("#button_add_driver").on('click', function (e) {
-            let driver_mobile_number = $('#input_driver_mobile').val()
-            let driver_name = $('#driver_name :selected').text()
+            driver_mobile_number = $('#input_driver_mobile').val()
+            driver_name = $('#driver_name :selected').text()
 
             if (driver_name == "" || driver_name == null) {
                 alert('Driver name is mandatory')
@@ -504,9 +504,13 @@
                         alert(ERROR_TOKEN_EMPTY)
                     } else {
                         if (response['code'] == API_SUCCESS_CODE) {
-                            let token = response['auth_token']
+                            token = response['auth_token'];
 
-                            call_add_driver(driver_name, driver_mobile_number, token)
+                            if (driver_name != null && driver_mobile_number != null && driver_name != "" && driver_mobile_number != "") {
+                                call_add_driver(driver_name, driver_mobile_number, token);
+                            } else {
+                                startTracking();
+                            }
                         } else {
                             if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
                                 alert(response['responseJSON']['message'])
@@ -658,6 +662,52 @@
                 }
             });
         }
+
+        function startTracking() {
+            // Generate a new token if token is empty
+            if (token == null || token == "") {
+                get_access_token(null, null);
+            } else {
+                $.ajax({
+                    type: "GET",
+                    beforeSend: function (request) {
+                        request.setRequestHeader("Authorization", "bearer " + token);
+                        showLoader();
+                    },
+                    url: BASE_URL + ENDPOINT_START_USER_TRACKING + driver_mobile_number,
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (response) {
+                        hideLoader();
+
+                        if (response == null) {
+                            alert(ERROR_RESPONSE_NULL)
+                        } else {
+                            if (response['code'] == API_SUCCESS_CODE) {
+                                alert(SUCCESS_CREATE_TRIP);
+                                reroute();
+                            } else {
+                                if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                                    alert(response['responseJSON']['message'])
+                                } else {
+                                    alert(ERROR_STARTING_TRACKING)
+                                }
+                            }
+                        }
+                    },
+                    error: function (response) {
+                        hideLoader()
+
+                        if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+                            alert(response['responseJSON']['message'])
+                        } else {
+                            alert(ERROR_STARTING_TRACKING)
+                        }
+                    }
+                });
+            }
+        }
+
     </script>
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAL7VxK8eW8-f2w_bzSeynTSPX941Msx9c&libraries=places&callback=initMap"
