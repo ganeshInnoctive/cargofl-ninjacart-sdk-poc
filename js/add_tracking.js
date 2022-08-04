@@ -195,13 +195,11 @@ function add_marker(position, address, title, map) {
         infowindow.open(map, marker);
     });
 
-    // Hacky but only way out. This fetches the div name.
-    if (map['__gm']['div']['id'] == "start_map") {
+    if (map.getDiv().id == "start_map") {
         $("#start_location_name").val(address)
         $("#start_location_lat").val(position.lat)
         $("#start_location_long").val(position.lng)
-    }
-    else {
+    } else {
         $("#end_location_name").val(address)
         $("#end_location_lat").val(position.lat)
         $("#end_location_long").val(position.lng)
