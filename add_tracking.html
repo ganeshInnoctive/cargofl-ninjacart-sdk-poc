@@ -483,53 +483,54 @@
 
 
         function get_access_token(driver_name, driver_mobile_number) {
-            $.ajax({
-                type: "POST",
-                url: BASE_URL + ENDPOINT_GENERATE_AUTH_TOKEN,
-                data: JSON.stringify({
-                    "username": FLEETOS_USERNAME,
-                    "password": FLEETOS_PASSWORD
-                }),
-                contentType: 'application/json; charset=utf-8',
-                dataType: 'json',
-                beforeSend: function () {
-                    showLoader()
-                },
-                success: function (response) {
-                    hideLoader()
+			call_add_driver(driver_name, driver_mobile_number, FLEETOS_HARDCODED_TOKEN)
+            // $.ajax({
+            //     type: "POST",
+            //     url: BASE_URL + ENDPOINT_GENERATE_AUTH_TOKEN,
+            //     data: JSON.stringify({
+            //         "username": FLEETOS_USERNAME,
+            //         "password": FLEETOS_PASSWORD
+            //     }),
+            //     contentType: 'application/json; charset=utf-8',
+            //     dataType: 'json',
+            //     beforeSend: function () {
+            //         showLoader()
+            //     },
+            //     success: function (response) {
+            //         hideLoader()
 
-                    if (response == null) {
-                        alert(ERROR_RESPONSE_NULL)
-                    } else if (response['auth_token'] == null || response['auth_token'] == "") {
-                        alert(ERROR_TOKEN_EMPTY)
-                    } else {
-                        if (response['code'] == API_SUCCESS_CODE) {
-                            token = response['auth_token'];
+            //         if (response == null) {
+            //             alert(ERROR_RESPONSE_NULL)
+            //         } else if (response['auth_token'] == null || response['auth_token'] == "") {
+            //             alert(ERROR_TOKEN_EMPTY)
+            //         } else {
+            //             if (response['code'] == API_SUCCESS_CODE) {
+            //                 token = response['auth_token'];
 
-                            if (driver_name != null && driver_mobile_number != null && driver_name != "" && driver_mobile_number != "") {
-                                call_add_driver(driver_name, driver_mobile_number, token);
-                            } else {
-                                startTracking();
-                            }
-                        } else {
-                            if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
-                                alert(response['responseJSON']['message'])
-                            } else {
-                                alert(ERROR_GENERATING_AUTH_TOKEN)
-                            }
-                        }
-                    }
-                },
-                error: function (response) {
-                    hideLoader()
+            //                 if (driver_name != null && driver_mobile_number != null && driver_name != "" && driver_mobile_number != "") {
+            //                     call_add_driver(driver_name, driver_mobile_number, token);
+            //                 } else {
+            //                     startTracking();
+            //                 }
+            //             } else {
+            //                 if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+            //                     alert(response['responseJSON']['message'])
+            //                 } else {
+            //                     alert(ERROR_GENERATING_AUTH_TOKEN)
+            //                 }
+            //             }
+            //         }
+            //     },
+            //     error: function (response) {
+            //         hideLoader()
 
-                    if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
-                        alert(response['responseJSON']['message'])
-                    } else {
-                        alert(ERROR_GENERATING_AUTH_TOKEN)
-                    }
-                }
-            });
+            //         if (response['responseJSON']['message'] != null && response['responseJSON']['message'] != "") {
+            //             alert(response['responseJSON']['message'])
+            //         } else {
+            //             alert(ERROR_GENERATING_AUTH_TOKEN)
+            //         }
+            //     }
+            // });
         }
 
         function call_add_driver(driver_name, driver_mobile_number, token) {
